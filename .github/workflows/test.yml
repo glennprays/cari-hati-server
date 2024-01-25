@@ -24,3 +24,11 @@ jobs:
 
       - name: Run tests using npm script
         run: npm run test
+
+      - name: Add comment to PR
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ✅ Test Passes!
+          message-failure: |
+            ❌ Test Failed!
