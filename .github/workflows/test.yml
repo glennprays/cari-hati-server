@@ -35,12 +35,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const result = process.env['GITHUB_RUN_CONCLUSION'] === 'success' ? '✅ Tests passed!' : '❌ Tests failed.';
-            const context = JSON.parse(process.env['GITHUB_CONTEXT']);
-            const octokit = new github.getOctokit(process.env['GITHUB_TOKEN']);
+            const octokit = require('@octokit/rest')();
             
-            await octokit.rest.issues.createComment({
-              owner: context.payload.repository.owner.login,
-              repo: context.payload.repository.name,
-              issue_number: context.payload.pull_request.number,
+            octokit.issues.createComment({
+              owner: process.env['GITHUB_REPOSITORY_OWNER'],
+              repo: process.env['GITHUB_REPOSITORY'],
+              issue_number: process.env['GITHUB_PULL_REQUEST'],
               body: result,
             });
