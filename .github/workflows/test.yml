@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -27,11 +27,3 @@ jobs:
 
       - name: Run tests using npm script
         run: npm run test
-
-      - name: Add comment to PR
-        uses: mshick/add-pr-comment@v2
-        with:
-          message: |
-            ✅ Test Passes!
-          message-failure: |
-            ❌ Test Failed!
