@@ -10,9 +10,6 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
 
-    permissions:
-      pull-requests: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,3 +24,11 @@ jobs:
 
       - name: Run tests using npm script
         run: npm run test
+
+      - name: Add comment to PR
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ✅ Test Passes!
+          message-failure: |
+            ❌ Test Failed!
