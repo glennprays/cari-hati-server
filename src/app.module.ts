@@ -8,9 +8,10 @@ import { ChatModule } from './chat/chat.module';
 import { GiftModule } from './gift/gift.module';
 import { NotificationModule } from './notification/notification.module';
 import { CoinModule } from './coin/coin.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, AuthModule, CommonModule, ChatModule, GiftModule, NotificationModule, CoinModule],
+  imports: [UserModule, AuthModule, CommonModule, ChatModule, GiftModule, NotificationModule, CoinModule, ConfigModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })

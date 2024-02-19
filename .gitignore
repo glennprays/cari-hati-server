@@ -35,5 +35,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 node_modules
 
+.env
+
 mongo_data
 mongo_express_data
