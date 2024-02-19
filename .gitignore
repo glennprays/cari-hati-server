@@ -38,4 +38,4 @@ node_modules
 .env
 
 mongo_data
-mongo_express_data
+pg_data
