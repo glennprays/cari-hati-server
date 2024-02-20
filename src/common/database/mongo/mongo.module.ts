@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import mongoConfig from './mongo.config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
     imports: [
         MongooseModule.forRootAsync({
-            useFactory: () => ({
-                uri: mongoConfig.uri,
+            imports: [ConfigModule],
+            useFactory: async (configService: ConfigService) => ({
+                uri: `mongodb://${configService.get('MONGO_USERNAME')}:${encodeURIComponent(configService.get('MONGO_PASSWORD'))}@${configService.get('MONGO_HOST')}:${configService.get('MONGO_PORT')}/${configService.get('MONGO_DATABASE')}`,
+                authSource: 'admin',
             }),
+            inject: [ConfigService],
         }),
     ],
 })
