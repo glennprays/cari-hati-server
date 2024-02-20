@@ -35,5 +35,9 @@ $ npm run test:cov
 ```
 ## Development Mode
 ```bash
-./docker-dev
+# run development stack
+$ npm run dev-stack
+
+# stop development stack
+$ npm run dev-stack:stop
 ```
