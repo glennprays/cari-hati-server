@@ -21,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
         CoinModule,
         ConfigModule.forRoot({
             envFilePath:
-                process.env.NODE_ENV === 'production' ? '.env' : '.env.dev',
+                ['.env.local', process.env.NODE_ENV === 'production' ? '.env' : '.env.dev'],
         }),
     ],
     controllers: [AppController],
