@@ -11,8 +11,17 @@ import { CoinModule } from './coin/coin.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, AuthModule, CommonModule, ChatModule, GiftModule, NotificationModule, CoinModule, ConfigModule.forRoot()],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        UserModule,
+        AuthModule,
+        CommonModule,
+        ChatModule,
+        GiftModule,
+        NotificationModule,
+        CoinModule,
+        ConfigModule.forRoot({ envFilePath: './misc/docker/.env' }),
+    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}
