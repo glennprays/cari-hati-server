@@ -26,5 +26,6 @@ services:
       - "6379:6379"
     volumes:
       - ./redis_data:/data
-    command: ["sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\""]
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["sh", "-c", "redis-server /usr/local/etc/redis/redis.conf --requirepass \"$REDIS_PASSWORD\""]
 
