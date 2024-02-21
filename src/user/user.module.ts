@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { RegistrationModule } from './registration/registration.module';
-import { MatchModule } from './match/match.module';
+import { MatchModule } from './features/match/match.module';
+import { PhotoGalleryModule } from './features/photo-gallery/photo-gallery.module';
 
 @Module({
-  imports: [RegistrationModule, MatchModule]
+    imports: [MatchModule, PhotoGalleryModule],
 })
 export class UserModule {}

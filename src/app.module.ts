@@ -19,7 +19,10 @@ import { ConfigModule } from '@nestjs/config';
         GiftModule,
         NotificationModule,
         CoinModule,
-        ConfigModule.forRoot({ envFilePath: './misc/docker/.env' }),
+        ConfigModule.forRoot({
+            envFilePath:
+                ['.env.local', process.env.NODE_ENV === 'production' ? '.env' : '.env.dev'],
+        }),
     ],
     controllers: [AppController],
     providers: [AppService],
