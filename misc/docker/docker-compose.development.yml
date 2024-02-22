@@ -3,7 +3,6 @@ version: '3.8'
 services:
   mongo:
     image: mongo
-    restart: always
     ports:
       - 27017:27017
     environment:
@@ -14,7 +13,6 @@ services:
     
   postgres:
     image: postgres
-    restart: always
     ports:
       - 5432:5432
     volumes:
@@ -28,4 +26,19 @@ services:
       - ./redis_data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     command: ["sh", "-c", "redis-server /usr/local/etc/redis/redis.conf --requirepass \"$REDIS_PASSWORD\""]
+
+  localstack:
+    image: "localstack/localstack:s3-latest"
+    ports:
+      - "4566-4584:4566-4584"
+    environment:
+      - DEBUG=${DEBUG:-0}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - EDGE_PORT=${EDGE_PORT:-4566}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ENDPOINT=${AWS_ENDPOINT}
+    volumes:
+      - "./s3_data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
