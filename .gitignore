@@ -42,3 +42,5 @@ mongo_data
 pg_data
 redis_data
 s3_data
+
+service-account-file.json
