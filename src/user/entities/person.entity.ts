@@ -1,8 +1,14 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    Unique,
+} from 'typeorm';
 
 export enum Role {
     ADMIN = 'admin',
-    USER =  'user'
+    USER = 'user',
 }
 
 @Entity()
@@ -17,20 +23,19 @@ export class Person {
     @Column({
         type: 'enum',
         enum: Role,
-        default: Role.USER
+        default: Role.USER,
     })
     role: Role;
 
     @Column()
     password: string;
 
-    @CreateDateColumn({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
     @Column()
     activatedAt: Date;
 
-    @CreateDateColumn({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
-
 }

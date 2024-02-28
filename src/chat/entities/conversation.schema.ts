@@ -4,7 +4,6 @@ import { UserMatched } from 'src/user/features/match/entities/match.schema';
 
 @Schema()
 export class Conversation extends Document {
-
     @Prop({ type: sc.Types.ObjectId, ref: UserMatched })
     matchedId: sc.Types.ObjectId;
 
