@@ -11,24 +11,23 @@ export enum NotificationType {
 
 @Schema()
 export class Data extends Document {
-    @Prop({ type: sc.Types.ObjectId, ref: UserAccount})
+    @Prop({ type: sc.Types.ObjectId, ref: UserAccount })
     userId: sc.Types.ObjectId;
 }
 
 @Schema()
 export class UserNotification extends Document {
-
-    @Prop({type: String, enum: NotificationType, required: true})
+    @Prop({ type: String, enum: NotificationType, required: true })
     type: NotificationType;
 
-    @Prop({ type: sc.Types.ObjectId, ref: UserAccount})
+    @Prop({ type: sc.Types.ObjectId, ref: UserAccount })
     userId: sc.Types.ObjectId;
 
     @Prop({ type: String, required: true })
     title: string;
 
     @Prop({ type: String, required: true })
-    body: string
+    body: string;
 
     @Prop({ type: Data, default: null })
     data?: Data;
@@ -40,4 +39,5 @@ export class UserNotification extends Document {
     createdAt: Date;
 }
 
-export const UserNotificationSchema = SchemaFactory.createForClass(UserNotification);
+export const UserNotificationSchema =
+    SchemaFactory.createForClass(UserNotification);

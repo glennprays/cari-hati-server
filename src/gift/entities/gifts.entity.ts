@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class GiftItem {
@@ -10,14 +17,17 @@ export class GiftItem {
 
     @Column('bigint')
     coinAmount: number;
-    
+
     @Column()
     imagePath: string;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
-    @OneToMany(() => GiftTransaction, (giftTransaction) => giftTransaction.giftItem)
+    @OneToMany(
+        () => GiftTransaction,
+        (giftTransaction) => giftTransaction.giftItem,
+    )
     giftTransactions: GiftTransaction[];
 }
 

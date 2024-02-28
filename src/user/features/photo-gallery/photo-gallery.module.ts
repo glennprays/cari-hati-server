@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { PhotoGalleryService } from './photo-gallery.service';
 
 @Module({
-  providers: [PhotoGalleryService]
+    providers: [PhotoGalleryService],
 })
 export class PhotoGalleryModule {}

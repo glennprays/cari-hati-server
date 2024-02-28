@@ -8,7 +8,6 @@ export enum Gender {
     FEMALE = 'female',
 }
 
-
 @Schema()
 export class UserPhotoProfile extends Document {
     @Prop({ type: String, unique: true })
@@ -20,8 +19,7 @@ export class UserPhotoProfile extends Document {
 
 @Schema()
 export class UserPassion extends Document {
-
-    @Prop({ type: sc.ObjectId, ref: Passion})
+    @Prop({ type: sc.ObjectId, ref: Passion })
     passion: Passion;
 
     @Prop({ type: Date, default: Date.now })
@@ -31,7 +29,6 @@ export class UserPassion extends Document {
     deletedAt: Date;
 }
 
-
 @Schema()
 export class UserAccount extends Document {
     @Prop({ type: String, required: true, unique: true })
@@ -40,7 +37,7 @@ export class UserAccount extends Document {
     @Prop({ type: String, required: true, unique: true })
     name: string;
 
-    @Prop({ type: UserPhotoProfile, required: true, unique: true})
+    @Prop({ type: UserPhotoProfile, required: true, unique: true })
     photoProfile: UserPhotoProfile;
 
     @Prop({ type: String, required: true, unique: true })
@@ -52,8 +49,8 @@ export class UserAccount extends Document {
     @Prop({ type: String, required: true })
     description: string;
 
-    @Prop({type: BigInt, required: true})
-    coinAmount: BigInt;
+    @Prop({ type: BigInt, required: true })
+    coinAmount: bigint;
 
     @Prop({ type: Date, default: Date.now })
     createdAt: Date;
@@ -61,10 +58,10 @@ export class UserAccount extends Document {
     @Prop({ type: Date, default: Date.now })
     updatedAt: Date;
 
-    @Prop([{ type: UserPassion, default: []}])
+    @Prop([{ type: UserPassion, default: [] }])
     passions: UserPassion[];
 
-    @Prop({ type: sc.ObjectId, ref: UserGallery, default: null})
+    @Prop({ type: sc.ObjectId, ref: UserGallery, default: null })
     gallery: UserGallery;
 }
 
