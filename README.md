@@ -27,6 +27,15 @@ $ npm run dev-stack:stop
 $ npm install
 ```
 
+### Database migration
+```bash
+# Run the migration
+$ npm run migration:run
+
+# Revert migration
+$ npm run migration:revert
+```
+
 ### Running the app
 
 ```bash
