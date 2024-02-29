@@ -12,7 +12,7 @@ export class PostgresConfigService implements TypeOrmOptionsFactory {
             password: process.env.PG_DB_PASSWORD,
             database: process.env.PG_DB_DATABASE,
             entities: [__dirname + '/../../../**/*.entity{.ts,.js}'],
-            synchronize: false,
+            synchronize: process.env.NODE_ENV === 'development',
         };
     }
 }
