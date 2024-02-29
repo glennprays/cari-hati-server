@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { TypeOrmOptionsFactory, TypeOrmModuleOptions  } from '@nestjs/typeorm';
+import { TypeOrmOptionsFactory, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 @Injectable()
 export class PostgresConfigService implements TypeOrmOptionsFactory {
-
     createTypeOrmOptions(): TypeOrmModuleOptions {
         return {
             type: 'postgres',
@@ -12,8 +11,8 @@ export class PostgresConfigService implements TypeOrmOptionsFactory {
             username: process.env.PG_DB_USER,
             password: process.env.PG_DB_PASSWORD,
             database: process.env.PG_DB_DATABASE,
-            entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
-            synchronize: process.env.NODE_ENV !== 'production',
+            entities: [__dirname + '/../../../**/*.entity{.ts,.js}'],
+            synchronize: false,
         };
     }
 }

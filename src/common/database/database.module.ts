@@ -4,6 +4,6 @@ import { PostgresModule } from './postgres/postgres.module';
 import { RedisModule } from './redis/redis.module';
 
 @Module({
-  imports: [MongoModule, PostgresModule, RedisModule],
+    imports: [MongoModule, PostgresModule, RedisModule],
 })
 export class DatabaseModule {}

@@ -6,7 +6,12 @@ import { PasswordResetService } from './password-reset/password-reset.service';
 import { RegistrationService } from './registration/registration.service';
 
 @Module({
-  providers: [LoginService, LogoutService, PasswordResetService, RegistrationService],
-  imports: [EmailVerificationModule]
+    providers: [
+        LoginService,
+        LogoutService,
+        PasswordResetService,
+        RegistrationService,
+    ],
+    imports: [EmailVerificationModule],
 })
 export class AuthModule {}
