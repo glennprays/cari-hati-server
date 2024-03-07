@@ -1,9 +1,11 @@
+import { hash } from 'argon2';
 import {
     Column,
     CreateDateColumn,
     Entity,
     PrimaryGeneratedColumn,
     Unique,
+    BeforeInsert,
 } from 'typeorm';
 
 export enum Role {
@@ -37,4 +39,9 @@ export class Person {
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
+
+    @BeforeInsert()
+    async setPassword(password: string) {
+        this.password = await hash(password || this.password);
+    }
 }
