@@ -3,6 +3,7 @@ import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { Person, Role } from "src/user/entities/person.entity";
 
 export default class DummySeeder implements Seeder {
+    track = true;
     public async run(
         dataSource: DataSource,
         factoryManager: SeederFactoryManager,
