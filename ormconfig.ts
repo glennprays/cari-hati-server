@@ -1,12 +1,8 @@
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: __dirname + '/../../.env' });
-
 import 'reflect-metadata';
-import { DataSourceOptions } from 'typeorm';
-import { SeederOptions } from 'typeorm-extension';
-
-export const dataSourceOptions: DataSourceOptions & SeederOptions = {
+export default {
     type: 'postgres',
     host: process.env.PG_DB_HOST,
     port: parseInt(process.env.PG_DB_PORT, 10) || 5432,
@@ -14,4 +10,6 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     password: process.env.PG_DB_PASSWORD,
     database: process.env.PG_DB_DATABASE,
     synchronize: false,
+    seeds: ['src/database/seeding/seeds/**/*{.ts,.js}'],
+    factories: ['src/database/seeding/factories/**/*{.ts,.js}']
 };
