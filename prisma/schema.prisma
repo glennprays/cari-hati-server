@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PG_DB_URL")
+}
+
+model coin_transaction {
+  transactionId                    String                       @id(map: "PK_d0d1b4baa1f1b56f36fd3b2ee58") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userAccountId                    String                       @db.VarChar
+  coinAmount                       BigInt
+  moneyAmount                      Int
+  transactionFee                   Int
+  status                           coin_transaction_status_enum @default(WAITING)
+  bankAccountNumber                BigInt
+  createdAt                        DateTime                     @default(now()) @db.Timestamp(6)
+  updatedAt                        DateTime                     @default(now()) @db.Timestamp(6)
+  transactionTypeTransactionTypeId Int?
+  coin_transaction_type            coin_transaction_type?       @relation(fields: [transactionTypeTransactionTypeId], references: [transactionTypeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_d30f9e6ed44d145c755774e285d")
+}
+
+model coin_transaction_type {
+  transactionTypeId Int                @id(map: "PK_61a406073b311170189d25736bb") @default(autoincrement())
+  name              String             @unique(map: "UQ_7e1cd3574a559cb6fac13196dab") @db.VarChar
+  feePercentage     Int
+  createdAt         DateTime           @default(now()) @db.Timestamp(6)
+  coin_transaction  coin_transaction[]
+}
+
+model gift_item {
+  giftItemId       String             @id(map: "PK_a3b4eab5e05d492765890d29064") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name             String             @db.VarChar
+  coinAmount       BigInt
+  imagePath        String             @db.VarChar
+  createdAt        DateTime           @default(now()) @db.Timestamp(6)
+  gift_transaction gift_transaction[]
+}
+
+model gift_transaction {
+  giftTransactionId  String     @id(map: "PK_e6c3ccf00cb4185681ab6e83ee3") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  senderAccountId    String     @db.VarChar
+  receiverAccountId  String     @db.VarChar
+  coinAmount         BigInt
+  createdAt          DateTime   @default(now()) @db.Timestamp(6)
+  giftItemGiftItemId String?    @db.Uuid
+  gift_item          gift_item? @relation(fields: [giftItemGiftItemId], references: [giftItemId], onDelete: NoAction, onUpdate: NoAction, map: "FK_6fb26f046492292cbafe3157c55")
+}
+
+model person {
+  personId    String           @id(map: "PK_84a53bea0e639207a7702250a4d") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email       String           @unique(map: "UQ_d2d717efd90709ebd3cb26b936c") @db.VarChar
+  role        person_role_enum
+  password    String           @db.VarChar
+  createdAt   DateTime         @default(now()) @db.Timestamp(6)
+  activatedAt DateTime         @db.Timestamp(6)
+  updatedAt   DateTime         @default(now()) @db.Timestamp(6)
+}
+
+enum coin_transaction_status_enum {
+  WAITING
+  SUCCESS
+  FAILED
+}
+
+enum person_role_enum {
+  admin
+  user
+}
