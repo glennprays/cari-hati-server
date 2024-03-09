@@ -1,0 +1,44 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "./generated/client"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("MONGO_URI")
+}
+
+model User {
+    id           String           @id @map("_id")
+    name         String
+    photoProfile UserPhotoProfile
+    gender       Gender
+    birth        DateTime         @db.Date
+    description  String
+    coinAmount   BigInt           @default(0)
+    passions     UserPassion[]    
+    createdAt    DateTime         @default(now())
+    updatedAt    DateTime         @default(now())
+}
+
+type UserPhotoProfile {
+    path      String
+    updatedAt DateTime @default(now())
+}
+
+enum Gender {
+    male
+    female
+}
+
+type UserPassion {
+    name      String
+    createdAt DateTime  @default(now())
+    deletedAt DateTime?
+}
+
+model Passion {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    name      String
+    createdAt DateTime @default(now())
+}
