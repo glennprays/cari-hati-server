@@ -1,17 +1,9 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - ./mongo_data:/data/db
-    
+     
   postgres:
+    container_name: ch-postgres
     image: postgres
     ports:
       - 5432:5432
@@ -19,15 +11,17 @@ services:
       - ./pg_data:/var/lib/postgresql/data
 
   redis:
+    container_name: ch-redis
     image: "redis:latest"
     ports:
       - "6379:6379"
     volumes:
       - ./redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["sh", "-c", "redis-server /usr/local/etc/redis/redis.conf --requirepass \"$REDIS_PASSWORD\""]
 
   localstack:
+    container_name: ch-localstack
     image: "localstack/localstack:s3-latest"
     ports:
       - "4566-4584:4566-4584"

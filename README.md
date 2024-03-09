@@ -4,9 +4,12 @@ CariHati is a tinder clone project
 
 ## Getting Started
 ### PREPARATION (IMPORTANT)
+### Docker
+Make sure you have docker installed
+### Mongodb Atlas
+If you don't have MongoDB Atlas Account [create here]('https://mongodb.com/atlas)
 ### ENV File
-- `.env`: For production, you have to create the file base on `.env.template` before run in production
-- `.env.dev`: For development phase, no need to create it because it already exist
+- `.env`: This is main env file, you have to create the file base on `.env.template` before run in production
 - `.env.local`: This file used for development and production, please create the file base on `.env.local.example` before run
 ### CREDENTIALS
 -  `firebase private key`: generate your firebase private by follow [this](https://firebase.google.com/docs/admin/setup?authuser=1#initialize_the_sdk_in_non-google_environments), and store your private key at `./src/common/firebase/credentials/service-account-file.json`
@@ -25,15 +28,6 @@ $ npm run dev-stack:stop
 
 ```bash
 $ npm install
-```
-
-### Database migration
-```bash
-# Run the migration
-$ npm run migration:run
-
-# Revert migration
-$ npm run migration:revert
 ```
 
 ### Running the app
