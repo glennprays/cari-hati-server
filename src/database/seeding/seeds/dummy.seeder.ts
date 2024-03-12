@@ -23,14 +23,21 @@ export async function dummySeeder(
         update: {},
         create: {
             id: person.id,
-            name: 'PraGib',
+            name: 'Pragib',
             photoProfile: {
                 path: 'https://randomuser.me/api/portraits',
                 updatedAt: new Date(),
             },
             gender: 'male',
             birth: '1951-08-17T00:00:00Z',
-            description: 'lelaki ganteng dari majalaya',
+            description: 'Handsome man from Majalaya',
+            passions: [
+                { name: 'Dancing' },
+                { name: 'Singing' },
+                { name: 'Reading' },
+                { name: 'Traveling' },
+                { name: 'Cooking' },
+            ],
         },
     });
 }

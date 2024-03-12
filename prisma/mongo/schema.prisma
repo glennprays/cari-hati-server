@@ -9,16 +9,23 @@ datasource db {
 }
 
 model User {
-    id           String           @id @map("_id")
-    name         String
-    photoProfile UserPhotoProfile
-    gender       Gender
-    birth        DateTime         @db.Date
-    description  String
-    coinAmount   BigInt           @default(0)
-    passions     UserPassion[]    
-    createdAt    DateTime         @default(now())
-    updatedAt    DateTime         @default(now())
+    id            String           @id @map("_id")
+    name          String
+    photoProfile  UserPhotoProfile
+    gender        Gender
+    birth         DateTime         @db.Date
+    description   String
+    coinAmount    BigInt           @default(0)
+    passions      UserPassion[]
+    createdAt     DateTime         @default(now())
+    updatedAt     DateTime         @default(now())
+    userGallery   UserGallery?     @relation("UserGallery", fields: [userGalleryId], references: [id])
+    userGalleryId String?          @unique @db.ObjectId
+    Notification  Notification[]   @relation("Notification")
+    Blocking      Blocked[]        @relation("Blocking")
+    Blocked       Blocked[]        @relation("Blocked")
+    sender        UserMatch[]      @relation("MatchSender")
+    receiver      UserMatch[]      @relation("MatchReceiver")
 }
 
 type UserPhotoProfile {
@@ -41,4 +48,77 @@ model Passion {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
     name      String
     createdAt DateTime @default(now())
+}
+
+model UserGallery {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    user      User?    @relation("UserGallery")
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model PhotoGallery {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    path      String
+    createdAt DateTime  @default(now())
+    deletedAt DateTime?
+}
+
+enum NotificationType {
+    like
+    match
+    anoucement
+    warning
+}
+
+model Notification {
+    id        String            @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String
+    user      User              @relation("Notification", fields: [userId], references: [id])
+    title     String
+    body      String
+    data      NotificationData?
+    readAt    DateTime?
+    type      NotificationType
+    createdAt DateTime          @default(now())
+}
+
+type NotificationData {
+    userId String
+}
+
+model Blocked {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    blockerId   String
+    blockedId   String
+    createdAt   DateTime @default(now())
+    userBlocker User     @relation("Blocking", fields: [blockerId], references: [id])
+    userBloked  User     @relation("Blocked", fields: [blockedId], references: [id])
+}
+
+enum MatchStatus {
+    pending
+    accepted
+    rejected
+    ignored
+}
+
+model UserMatch {
+    id           String        @id @default(auto()) @map("_id") @db.ObjectId
+    senderId     String
+    receiverId   String
+    liked        Boolean
+    status       MatchStatus
+    updatedAt    DateTime      @default(now())
+    createdAt    DateTime      @default(now())
+    sender       User          @relation("MatchSender", fields: [senderId], references: [id])
+    receiver     User          @relation("MatchReceiver", fields: [receiverId], references: [id])
+    conversation Conversation?
+}
+
+model Conversation {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    matchId   String    @unique @db.ObjectId
+    match     UserMatch @relation(fields: [matchId], references: [id])
+    createdAt DateTime  @default(now())
 }
