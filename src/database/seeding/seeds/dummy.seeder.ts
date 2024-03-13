@@ -1,30 +1,43 @@
-import { Connection } from 'typeorm';
-import { Factory, Seeder } from 'typeorm-seeding';
-import { Person, Role } from '../../../user/entities/person.entity';
+import { PrismaClient as PostgresClient } from '../../../../prisma/postgres/generated/client';
+import { PrismaClient as MongoClient } from '../../../../prisma/mongo/generated/client';
+import { Prisma } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library';
 
+export async function dummySeeder(
+    mongo: MongoClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+    postgres: PostgresClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+): Promise<void> {
+    const person = await postgres.person.upsert({
+        where: { email: 'pragib2@gmail.com' },
+        update: {},
+        create: {
+            email: 'pragib2@gmail.com',
+            password: 'PraGib123',
+            role: 'user',
+            activatedAt: new Date(),
+        },
+    });
 
-export default class DummySeeder implements Seeder {
-    public async run(factory: Factory, connection: Connection): Promise<any> {
-        const person = await factory(Person)().createMany(2);
-    }
+    await mongo.user.upsert({
+        where: { id: person.id },
+        update: {},
+        create: {
+            id: person.id,
+            name: 'Pragib',
+            photoProfile: {
+                path: 'https://randomuser.me/api/portraits',
+                updatedAt: new Date(),
+            },
+            gender: 'male',
+            birth: '1951-08-17T00:00:00Z',
+            description: 'Handsome man from Majalaya',
+            passions: [
+                { name: 'Dancing' },
+                { name: 'Singing' },
+                { name: 'Reading' },
+                { name: 'Traveling' },
+                { name: 'Cooking' },
+            ],
+        },
+    });
 }
-
-// export default class DummySeeder implements Seeder {
-//     track = true;
-//     public async run(
-//         dataSource: DataSource,
-//         factoryManager: SeederFactoryManager,
-//     ): Promise<any> {
-//         const personRepository = dataSource.getRepository(Person);
-//         const person = new Person();
-//         person.email = 'pragib@gmail.com';
-//         person.role = Role.USER;
-//         person.password = 'examplePassword123';
-//         person.activatedAt = new Date();
-
-//         const personFactory = factoryManager.get(Person);
-//         await personFactory.save();
-
-//         await personRepository.insert(person);
-//     }
-// }
