@@ -2,6 +2,7 @@ import { PrismaClient as PostgresClient } from '../../../../prisma/postgres/gene
 import { PrismaClient as MongoClient } from '../../../../prisma/mongo/generated/client';
 import { Prisma } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
+import { hash } from 'argon2';
 
 export async function dummySeeder(
     mongo: MongoClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -12,7 +13,7 @@ export async function dummySeeder(
         update: {},
         create: {
             email: 'pragib2@gmail.com',
-            password: 'PraGib123',
+            password: await hash('PraGib123'),
             role: 'user',
             activatedAt: new Date(),
         },
