@@ -1,0 +1,91 @@
+generator client {
+    provider = "prisma-client-js"
+    output = "./generated/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("PG_DB_URI")
+}
+
+model CoinTransaction {
+    id                  String                @id(map: "PK_d0d1b4baa1f1b56f36fd3b2ee58") @default(uuid()) @map("transaction_id") @db.Uuid
+    userAccountId       String                @map("user_account_id") @db.Uuid
+    coinAmount          BigInt
+    moneyAmount         Int                   @map("money_amount")
+    transactionFee      Int                   @map("transaction_fee")
+    status              CoinTransactionStatus @default(waiting)
+    bankAccountNumber   BigInt                @map("bank_account_number")
+    createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+    updatedAt           DateTime              @default(now()) @map("updated_at") @db.Timestamp(6)
+    transactionTypeId   Int                   @map("transaction_type_id")
+    coinTransactionType CoinTransactionType?  @relation("CoinTransaction", fields: [transactionTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d30f9e6ed44d145c755774e285d")
+    user                Person                @relation("UserCoinTransaction", fields: [userAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+    @@map("coin_transaction")
+}
+
+model CoinTransactionType {
+    id               Int               @id(map: "PK_61a406073b311170189d25736bb") @default(autoincrement()) @map("transaction_type_id")
+    name             String            @unique(map: "UQ_7e1cd3574a559cb6fac13196dab") @db.VarChar
+    feePercentage    Int               @map("fee_percentage")
+    createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+    coinTransactions CoinTransaction[] @relation("CoinTransaction")
+
+    @@map("coin_transaction_type")
+}
+
+model GiftItem {
+    id               String            @id(map: "PK_a3b4eab5e05d492765890d29064") @default(uuid()) @map("gift_item_id") @db.Uuid
+    name             String            @db.VarChar
+    coinAmount       BigInt            @map("coin_amount")
+    imagePath        String            @map("image_path") @db.VarChar
+    createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+    giftTransactions GiftTransaction[] @relation("GiftTransaction")
+
+    @@map("gift_item")
+}
+
+model GiftTransaction {
+    id                String   @id(map: "PK_e6c3ccf00cb4185681ab6e83ee3") @default(uuid()) @map("gift_transaction_id") @db.Uuid
+    senderAccountId   String   @map("sender_account_id") @db.Uuid
+    receiverAccountId String   @map("receiver_account_id") @db.Uuid
+    coinAmount        BigInt   @map("coin_amount")
+    createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+    giftItemId        String   @map("gift_item_id") @db.Uuid
+    giftItem          GiftItem @relation("GiftTransaction", fields: [giftItemId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_6fb26f046492292cbafe3157c55")
+    sender            Person   @relation("GiftSender", fields: [senderAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    receiver          Person   @relation("GiftReceiver", fields: [receiverAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+    @@map("gift_transaction")
+}
+
+model Person {
+    id                      String            @id(map: "PK_84a53bea0e639207a7702250a4d") @default(uuid()) @map("person_id") @db.Uuid
+    email                   String            @unique(map: "UQ_d2d717efd90709ebd3cb26b936c") @db.VarChar
+    role                    PersonRole        @default(user)
+    password                String            @db.VarChar
+    createdAt               DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+    activatedAt             DateTime          @map("activated_at") @db.Timestamp(6)
+    updatedAt               DateTime          @default(now()) @map("updated_at") @db.Timestamp(6)
+    coinTransactions        CoinTransaction[] @relation("UserCoinTransaction")
+    giftTransactionsSender  GiftTransaction[] @relation("GiftSender")
+    giftTransactionReceiver GiftTransaction[] @relation("GiftReceiver")
+
+    @@map("person")
+}
+
+enum CoinTransactionStatus {
+    waiting
+    success
+    failed
+
+    @@map("coin_transaction_status_enum")
+}
+
+enum PersonRole {
+    admin
+    user
+
+    @@map("person_role_enum")
+}
