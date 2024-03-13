@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import * as Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 @Module({
     providers: [
         {
             provide: 'REDIS_CLIENT',
             useFactory: () => {
-                return new (Redis as any)({
+                return new Redis({
                     host: process.env.RD_HOST || 'localhost',
-                    port: process.env.RD_PORT || 6379,
+                    port: parseInt(process.env.RD_PORT) || 6379,
                     password: process.env.RD_PASSWORD || '',
                 });
             },

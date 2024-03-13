@@ -20,9 +20,7 @@ import { ConfigModule } from '@nestjs/config';
         NotificationModule,
         CoinModule,
         ConfigModule.forRoot({
-            envFilePath: [
-                '.env.local', '.env',
-            ],
+            envFilePath: ['.env.local', '.env'],
         }),
     ],
     controllers: [AppController],

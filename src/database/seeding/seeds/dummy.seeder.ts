@@ -18,7 +18,7 @@ export async function dummySeeder(
         },
     });
 
-    const user = await mongo.user.upsert({
+    await mongo.user.upsert({
         where: { id: person.id },
         update: {},
         create: {
