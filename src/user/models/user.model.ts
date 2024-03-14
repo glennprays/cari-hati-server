@@ -24,7 +24,7 @@ export class User implements UserModel {
     gender: Gender;
     birth: Date;
     description: string;
-    coinAmount: bigint;
+    coinAmount: number;
     createdAt: Date;
     updatedAt: Date;
     userGalleryId: string;
