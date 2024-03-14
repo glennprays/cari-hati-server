@@ -1,21 +1,24 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthService } from '../auth.service';
-import { AuthDto } from '../dtos/auth.dto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { PersonLoginResponseDTO } from 'src/user/dtos/person.dto';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
     constructor(private authService: AuthService) {
-        super();
+        super({
+            usernameField: 'email',
+        });
     }
 
-    async validate(email: string, password: string) {
+    async validate(
+        email: string,
+        password: string,
+    ): Promise<PersonLoginResponseDTO> {
         const person = await this.authService.validatePerson(email, password);
         if (!person) {
-            console.log('inside here');
-            // throw new UnauthorizedException();
-            return 'Invalid email or password';
+            throw new BadRequestException();
         }
         return person;
     }

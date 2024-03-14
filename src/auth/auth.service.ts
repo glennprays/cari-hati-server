@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PersonService } from 'src/user/services/person.service';
-import { AuthDto } from './dtos/auth.dto';
 import { verify } from 'argon2';
-import { Person } from 'src/user/models/person.model';
 import { JwtService } from '@nestjs/jwt';
+import { PersonLoginResponseDTO } from 'src/user/dtos/person.dto';
+import { PersonTokenPayload } from './models/payload.model';
 
 @Injectable()
 export class AuthService {
@@ -12,32 +12,44 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async validatePerson(emailInput: string, passwordInput: string) {
-        console.log('here validate');
+    async validatePerson(
+        emailInput: string,
+        passwordInput: string,
+    ): Promise<PersonLoginResponseDTO> {
         const person = await this.personService.findOneByEmail(emailInput);
         if (!person) {
-            // throw new BadRequestException('person not found');
-            return null
+            throw new BadRequestException('person not found');
         }
         const isMatch: boolean = await verify(person.password, passwordInput);
         if (!isMatch) {
-            // throw new BadRequestException('Invalid password');
-            return null
+            throw new BadRequestException('Invalid password');
         }
-        const { password, ...result } = person;
-        return result;
+        delete person.password;
+        return person;
     }
 
-    async signIn(data: AuthDto) {
-        const person = await this.validatePerson(data.email, data.password);
-        const payload = {
+    async login(person: PersonLoginResponseDTO) {
+        const payload: PersonTokenPayload = {
             username: person.email,
             sub: {
                 role: person.role,
             },
         };
 
-        const token = this.jwtService.sign(payload);
-        return { person: { ...person }, access_token: token };
+        const accessToken = this.jwtService.sign(payload);
+        const refreshToken = this.jwtService.sign(payload, {
+            expiresIn: '30d',
+            secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+        });
+        return {
+            person: { ...person },
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        };
+    }
+
+    async refreshToken(payload: PersonTokenPayload) {
+        const accessToken = this.jwtService.sign(payload);
+        return { access_token: accessToken };
     }
 }
