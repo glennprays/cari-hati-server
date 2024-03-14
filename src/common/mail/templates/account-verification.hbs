@@ -1,0 +1,56 @@
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8' />
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #f8f8f8;
+        }
+
+
+        h1 {
+            color: #336699;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+
+        p {
+            line-height: 1.6;
+            margin-bottom:
+                15px;
+        }
+
+        h2 {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 3em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Account Verification</h1>
+    <p>Dear {{email}},</p>
+    <p>Thank you for signing up. Please use the following code to verify
+        your email address:</p>
+
+    <h2>{{verificationNumber}}</h2>
+
+    <p>If you did not sign up for our service, please ignore this email.</p>
+
+    <p>Best regards,<br />
+        Cari Hati Team</p>
+</body>
+
+</html>

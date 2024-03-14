@@ -4,12 +4,14 @@ import { verify } from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { PersonLoginResponseDTO } from 'src/user/dtos/person.dto';
 import { PersonTokenPayload } from './models/payload.model';
+import { MailService } from 'src/common/mail/mail.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private personService: PersonService,
         private jwtService: JwtService,
+        private mailService: MailService,
     ) {}
 
     async validatePerson(
@@ -51,5 +53,14 @@ export class AuthService {
     async refreshToken(payload: PersonTokenPayload) {
         const accessToken = this.jwtService.sign(payload);
         return { access_token: accessToken };
+    }
+
+    async sendVerificationEmail(email: string) {
+        const verificationNumber = Math.floor(1000 + Math.random() * 9000);
+        this.mailService.sendAccountVerification(
+            email,
+            verificationNumber,
+        );
+        return { msg: 'Verification email sent' };
     }
 }
