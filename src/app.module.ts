@@ -9,21 +9,22 @@ import { GiftModule } from './gift/gift.module';
 import { NotificationModule } from './notification/notification.module';
 import { CoinModule } from './coin/coin.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
     imports: [
         UserModule,
-        AuthModule,
         CommonModule,
         ChatModule,
         GiftModule,
         NotificationModule,
         CoinModule,
+        AuthModule,
         ConfigModule.forRoot({
             envFilePath: ['.env.local', '.env'],
         }),
     ],
-    controllers: [AppController],
+    controllers: [AppController, AuthController],
     providers: [AppService],
 })
 export class AppModule {}
