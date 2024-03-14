@@ -1,17 +1,15 @@
 import { Module } from '@nestjs/common';
-import { LoginService } from './login/login.service';
-import { LogoutService } from './logout/logout.service';
-import { EmailVerificationModule } from './email-verification/email-verification.module';
-import { PasswordResetService } from './password-reset/password-reset.service';
-import { RegistrationService } from './registration/registration.service';
+import { UserModule } from 'src/user/user.module';
+import { AuthService } from './auth.service';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
-    providers: [
-        LoginService,
-        LogoutService,
-        PasswordResetService,
-        RegistrationService,
-    ],
-    imports: [EmailVerificationModule],
+    providers: [AuthService, LocalStrategy],
+    exports: [AuthService],
+    imports: [UserModule, JwtModule.register({
+        secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+        signOptions: { expiresIn: '3d' },
+    })],
 })
 export class AuthModule {}
