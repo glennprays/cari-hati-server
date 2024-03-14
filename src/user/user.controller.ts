@@ -1,13 +1,14 @@
-import { Body, Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './services/user.service';
-import { ProfileRequestDto } from './dtos/profile.dto';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
+    @UseGuards(JwtGuard)
     @Get('profile')
-    async getProfile(@Body() data: ProfileRequestDto) {
-        return this.userService.findProfileByEmail(data.email);
+    async getProfile(@Request() req) {
+        return this.userService.findProfileByEmail(req.user);
     }
 }
