@@ -10,6 +10,6 @@ import { LocalStrategy } from './strategies/local.strategy';
     imports: [UserModule, JwtModule.register({
         secret: process.env.JWT_ACCESS_TOKEN_SECRET,
         signOptions: { expiresIn: '3d' },
-    })],
+    }), ],
 })
 export class AuthModule {}
