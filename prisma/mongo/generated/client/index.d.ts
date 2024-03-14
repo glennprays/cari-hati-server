@@ -1820,7 +1820,7 @@ export namespace Prisma {
   }
 
   export type UserSumAggregateOutputType = {
-    coinAmount: bigint | null
+    coinAmount: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1829,7 +1829,7 @@ export namespace Prisma {
     gender: $Enums.Gender | null
     birth: Date | null
     description: string | null
-    coinAmount: bigint | null
+    coinAmount: number | null
     createdAt: Date | null
     updatedAt: Date | null
     userGalleryId: string | null
@@ -1841,7 +1841,7 @@ export namespace Prisma {
     gender: $Enums.Gender | null
     birth: Date | null
     description: string | null
-    coinAmount: bigint | null
+    coinAmount: number | null
     createdAt: Date | null
     updatedAt: Date | null
     userGalleryId: string | null
@@ -1998,7 +1998,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date
     description: string
-    coinAmount: bigint
+    coinAmount: number
     createdAt: Date
     updatedAt: Date
     userGalleryId: string | null
@@ -2083,7 +2083,7 @@ export namespace Prisma {
       gender: $Enums.Gender
       birth: Date
       description: string
-      coinAmount: bigint
+      coinAmount: number
       createdAt: Date
       updatedAt: Date
       userGalleryId: string | null
@@ -2527,7 +2527,7 @@ export namespace Prisma {
     readonly gender: FieldRef<"User", 'Gender'>
     readonly birth: FieldRef<"User", 'DateTime'>
     readonly description: FieldRef<"User", 'String'>
-    readonly coinAmount: FieldRef<"User", 'BigInt'>
+    readonly coinAmount: FieldRef<"User", 'Int'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly userGalleryId: FieldRef<"User", 'String'>
@@ -9980,16 +9980,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'BigInt'
+   * Reference to a field of type 'Int'
    */
-  export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
 
 
   /**
-   * Reference to a field of type 'BigInt[]'
+   * Reference to a field of type 'Int[]'
    */
-  export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -10029,20 +10029,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Int'
-   */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
-   * Reference to a field of type 'Int[]'
-   */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -10069,7 +10055,7 @@ export namespace Prisma {
     gender?: EnumGenderFilter<"User"> | $Enums.Gender
     birth?: DateTimeFilter<"User"> | Date | string
     description?: StringFilter<"User"> | string
-    coinAmount?: BigIntFilter<"User"> | bigint | number
+    coinAmount?: IntFilter<"User"> | number
     passions?: UserPassionCompositeListFilter | UserPassionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -10113,7 +10099,7 @@ export namespace Prisma {
     gender?: EnumGenderFilter<"User"> | $Enums.Gender
     birth?: DateTimeFilter<"User"> | Date | string
     description?: StringFilter<"User"> | string
-    coinAmount?: BigIntFilter<"User"> | bigint | number
+    coinAmount?: IntFilter<"User"> | number
     passions?: UserPassionCompositeListFilter | UserPassionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -10151,7 +10137,7 @@ export namespace Prisma {
     gender?: EnumGenderWithAggregatesFilter<"User"> | $Enums.Gender
     birth?: DateTimeWithAggregatesFilter<"User"> | Date | string
     description?: StringWithAggregatesFilter<"User"> | string
-    coinAmount?: BigIntWithAggregatesFilter<"User"> | bigint | number
+    coinAmount?: IntWithAggregatesFilter<"User"> | number
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     userGalleryId?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -10546,7 +10532,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10565,7 +10551,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10583,7 +10569,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10601,7 +10587,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10620,7 +10606,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10633,7 +10619,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10645,7 +10631,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11051,15 +11037,15 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type BigIntFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type UserPassionCompositeListFilter = {
@@ -11223,20 +11209,20 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type BigIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
     _count?: NestedIntFilter<$PrismaModel>
     _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedBigIntFilter<$PrismaModel>
-    _min?: NestedBigIntFilter<$PrismaModel>
-    _max?: NestedBigIntFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11653,12 +11639,12 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type BigIntFieldUpdateOperationsInput = {
-    set?: bigint | number
-    increment?: bigint | number
-    decrement?: bigint | number
-    multiply?: bigint | number
-    divide?: bigint | number
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type UserPassionListUpdateEnvelopeInput = {
@@ -12098,15 +12084,15 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type NestedBigIntFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type UserPassionWhereInput = {
@@ -12150,17 +12136,6 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type NestedIntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type NestedEnumGenderWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
@@ -12185,20 +12160,20 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type NestedBigIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
-    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
-    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
     _count?: NestedIntFilter<$PrismaModel>
     _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedBigIntFilter<$PrismaModel>
-    _min?: NestedBigIntFilter<$PrismaModel>
-    _max?: NestedBigIntFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type NestedFloatFilter<$PrismaModel = never> = {
@@ -12631,7 +12606,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12649,7 +12624,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12705,7 +12680,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12722,7 +12697,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12809,7 +12784,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12827,7 +12802,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12865,7 +12840,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12882,7 +12857,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12900,7 +12875,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12918,7 +12893,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12941,7 +12916,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12959,7 +12934,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12992,7 +12967,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13009,7 +12984,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13037,7 +13012,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13054,7 +13029,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13072,7 +13047,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13090,7 +13065,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13113,7 +13088,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13131,7 +13106,7 @@ export namespace Prisma {
     gender: $Enums.Gender
     birth: Date | string
     description: string
-    coinAmount?: bigint | number
+    coinAmount?: number
     passions?: XOR<UserPassionListCreateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13179,7 +13154,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13196,7 +13171,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13224,7 +13199,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13241,7 +13216,7 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     birth?: DateTimeFieldUpdateOperationsInput | Date | string
     description?: StringFieldUpdateOperationsInput | string
-    coinAmount?: BigIntFieldUpdateOperationsInput | bigint | number
+    coinAmount?: IntFieldUpdateOperationsInput | number
     passions?: XOR<UserPassionListUpdateEnvelopeInput, UserPassionCreateInput> | UserPassionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
