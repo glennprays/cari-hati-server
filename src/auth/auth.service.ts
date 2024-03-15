@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PersonLoginResponseDTO } from 'src/user/dtos/person.dto';
 import { PersonTokenPayload } from './models/payload.model';
 import { MailService } from 'src/common/mail/mail.service';
+import { RedisService } from 'src/common/database/redis/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
         private personService: PersonService,
         private jwtService: JwtService,
         private mailService: MailService,
+        private redisService: RedisService,
     ) {}
 
     async validatePerson(
@@ -56,11 +58,27 @@ export class AuthService {
     }
 
     async sendVerificationEmail(email: string) {
-        const verificationNumber = Math.floor(1000 + Math.random() * 9000);
-        this.mailService.sendAccountVerification(
+        // TODO: check if email is already verified
+        const verificationCode =
+            Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+        const status = await this.redisService.setVerificationCode(
             email,
-            verificationNumber,
+            verificationCode,
         );
-        return { msg: 'Verification email sent' };
+        if (status) {
+            this.mailService.sendAccountVerification(email, verificationCode);
+            return { message: 'Verification code sent' };
+        }
+    }
+
+    async activateAccount(email: string, code: number) {
+        const status = await this.redisService.verifyVerificationCode(
+            email,
+            code,
+        );
+        if (status) {
+            // TODO: update person activation status
+            return { message: 'Account activation success' };
+        }
     }
 }

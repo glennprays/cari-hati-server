@@ -20,9 +20,18 @@ export class AuthController {
         return await this.authService.refreshToken(req.user);
     }
 
-    // TODO: DELETE THIS. THIS IS JUST A TESTING EMAIL SEND
+    // DEBUG: DELETE THIS. THIS IS JUST A TESTING EMAIL SEND
     @Post('signup')
     async signUp(@Body() emailDto: EmailDTO) {
         return await this.authService.sendVerificationEmail(emailDto.email);
+    }
+
+    // FIXME: Get the email from the JWT token authorization header
+    @Post('account/activate')
+    async activateAccount(@Body() codeDto: { code: number; email: string }) {
+        return await this.authService.activateAccount(
+            codeDto.email,
+            codeDto.code,
+        );
     }
 }
