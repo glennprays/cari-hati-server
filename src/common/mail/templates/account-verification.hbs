@@ -21,6 +21,12 @@
             text-align: center;
         }
 
+        #warning {
+            color: #ff0000;
+            font-weight: bold;
+            font-style: italic;
+        }
+
 
         p {
             line-height: 1.6;
@@ -34,7 +40,7 @@
             border-radius: 5px;
             margin: 20px 0;
             text-align: center;
-            font-size: 3em;
+            font-size: 2em;
         }
     </style>
 </head>
@@ -45,8 +51,9 @@
     <p>Thank you for signing up. Please use the following code to verify
         your email address:</p>
 
-    <h2>{{verificationNumber}}</h2>
+    <h2>{{verificationCode}}</h2>
 
+    <p id="warning">This code will expired in two minutes.</p>
     <p>If you did not sign up for our service, please ignore this email.</p>
 
     <p>Best regards,<br />

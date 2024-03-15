@@ -5,7 +5,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class MailService {
     constructor(private mailerService: MailerService) {}
 
-    async sendAccountVerification(email: string, verificationNumber: number) {
+    async sendAccountVerification(email: string, verificationCode: number) {
         await this.mailerService.sendMail({
             to: email,
             sender: process.env.MAIL_USER,
@@ -13,7 +13,7 @@ export class MailService {
             template: './account-verification',
             context: {
                 email,
-                verificationNumber,
+                verificationCode,
             },
         });
     }
