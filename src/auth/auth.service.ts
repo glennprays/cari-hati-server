@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotAcceptableException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    NotAcceptableException,
+} from '@nestjs/common';
 import { PersonService } from 'src/user/services/person.service';
 import { verify } from 'argon2';
 import { JwtService } from '@nestjs/jwt';
@@ -58,13 +62,12 @@ export class AuthService {
     }
 
     async sendVerificationEmail(email: string) {
-        // TODO: check if email is already verified
-        const person = await this.personService.findOneByEmail(email)
+        const person = await this.personService.findOneByEmail(email);
         if (!person) {
             throw new NotAcceptableException('Account does not exist');
         } else if (person.activatedAt) {
             throw new NotAcceptableException('Account is already activated');
-        } 
+        }
         const verificationCode =
             Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
         const status = await this.redisService.setVerificationCode(
@@ -83,7 +86,7 @@ export class AuthService {
             code,
         );
         if (status) {
-            // TODO: update person activation status
+            await this.personService.activatePerson(email);
             return { message: 'Account activation success' };
         }
     }
