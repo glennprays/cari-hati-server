@@ -2,16 +2,20 @@ import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
-import { EmailDTO } from './dtos/email.dto';
+import { EmailDTO, RegisterPersonDTO } from './dtos/email.dto';
+import { PersonService } from 'src/user/services/person.service';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(
+        private authService: AuthService,
+        private personService: PersonService,
+    ) {}
 
     @UseGuards(LocalAuthGuard)
     @Post('signin')
     async signIn(@Request() req) {
-        return await this.authService.login(req.user);
+        return await this.authService.generateToken(req.user);
     }
 
     @UseGuards(JwtRefreshGuard)
@@ -33,5 +37,12 @@ export class AuthController {
             codeDto.email,
             codeDto.code,
         );
+    }
+
+    @Post('register')
+    async register(@Body() registerPersonDTO: RegisterPersonDTO) {
+        const person = await this.personService.inputPerson(registerPersonDTO.email, registerPersonDTO.password);
+        await this.authService.sendVerificationEmail(registerPersonDTO.email)
+        return await this.authService.generateToken(person)
     }
 }
