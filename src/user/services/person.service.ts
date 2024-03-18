@@ -14,12 +14,19 @@ export class PersonService {
 
     async inputPerson(email: string, password: string): Promise<Person | null> {
         return await this.postgres.person.create({
-            data:{
+            data: {
                 email: email,
                 password: await hash(password),
                 role: PersonRole.user,
-                activatedAt: null
-            }
-        })
+                activatedAt: null,
+            },
+        });
+    }
+
+    async activatePerson(email: string): Promise<Person | null> {
+        return await this.postgres.person.update({
+            where: { email: email },
+            data: { activatedAt: new Date() },
+        });
     }
 }

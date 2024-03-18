@@ -1,11 +1,21 @@
-import { PrismaClient as PostgresClient, Prisma as PrismaPostgres } from '../../../../prisma/postgres/generated/client';
-import { PrismaClient as MongoClient, Prisma as PrismaMongo } from '../../../../prisma/mongo/generated/client';
+import {
+    PrismaClient as PostgresClient,
+    Prisma as PrismaPostgres,
+} from '../../../../prisma/postgres/generated/client';
+import {
+    PrismaClient as MongoClient,
+    Prisma as PrismaMongo,
+} from '../../../../prisma/mongo/generated/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { hash } from 'argon2';
 
 export async function dummySeeder(
     mongo: MongoClient<PrismaPostgres.PrismaClientOptions, never, DefaultArgs>,
-    postgres: PostgresClient<PrismaMongo.PrismaClientOptions, never, DefaultArgs>,
+    postgres: PostgresClient<
+        PrismaMongo.PrismaClientOptions,
+        never,
+        DefaultArgs
+    >,
 ): Promise<void> {
     const person = await postgres.person.upsert({
         where: { email: 'pragib2@gmail.com' },
