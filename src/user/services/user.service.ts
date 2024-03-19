@@ -33,7 +33,7 @@ export class UserService {
             },
         });
         if (user) {
-            throw new BadRequestException('User already exist')
+            throw new BadRequestException('User already exist');
         }
         const userGallery = await this.mongoService.userGallery.create({
             data: {
