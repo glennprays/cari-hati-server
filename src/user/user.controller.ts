@@ -33,5 +33,6 @@ export class UserController {
             userResposeDTO.birth,
             userResposeDTO.description,
         );
+        return user;
     }
 }
