@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Patch,
     Post,
     Request,
     UseGuards,
@@ -9,9 +10,9 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
-import { RegisterPersonDTO } from './dtos/email.dto';
 import { PersonService } from 'src/user/services/person.service';
 import { JwtGuard } from './guards/jwt-auth.guard';
+import { PersonResponseDTO, PersonRegisterDTO } from 'src/user/dtos/person.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -42,7 +43,7 @@ export class AuthController {
     }
 
     @Post('register')
-    async register(@Body() registerPersonDTO: RegisterPersonDTO) {
+    async register(@Body() registerPersonDTO: PersonRegisterDTO) {
         const person = await this.personService.inputPerson(
             registerPersonDTO.email,
             registerPersonDTO.password,
@@ -56,5 +57,18 @@ export class AuthController {
             );
         }
         return await this.authService.generateToken(person);
+    }
+
+    @UseGuards(JwtGuard)
+    @Patch('account')
+    async updatePerson(
+        @Body() registerPersonDTO: PersonRegisterDTO,
+        @Request() req,
+    ) {
+        return await this.authService.updatePersonData({
+            personId: req.user.sub.id,
+            email: registerPersonDTO.email,
+            password: registerPersonDTO.password,
+        });
     }
 }
