@@ -9,23 +9,23 @@ datasource db {
 }
 
 model User {
-    id            String           @id @map("_id")
+    id            String            @id @map("_id")
     name          String
-    photoProfile  UserPhotoProfile
+    photoProfile  UserPhotoProfile?
     gender        Gender
-    birth         DateTime         @db.Date
+    birth         DateTime          @db.Date
     description   String
-    coinAmount    Int           @default(0)
+    coinAmount    Int               @default(0)
     passions      UserPassion[]
-    createdAt     DateTime         @default(now())
-    updatedAt     DateTime         @default(now())
-    userGallery   UserGallery?     @relation("UserGallery", fields: [userGalleryId], references: [id])
-    userGalleryId String?          @unique @db.ObjectId
-    Notification  Notification[]   @relation("Notification")
-    Blocking      Blocked[]        @relation("Blocking")
-    Blocked       Blocked[]        @relation("Blocked")
-    sender        UserMatch[]      @relation("MatchSender")
-    receiver      UserMatch[]      @relation("MatchReceiver")
+    createdAt     DateTime          @default(now())
+    updatedAt     DateTime          @default(now())
+    userGallery   UserGallery?      @relation("UserGallery", fields: [userGalleryId], references: [id])
+    userGalleryId String?           @unique @db.ObjectId
+    Notification  Notification[]    @relation("Notification")
+    Blocking      Blocked[]         @relation("Blocking")
+    Blocked       Blocked[]         @relation("Blocked")
+    sender        UserMatch[]       @relation("MatchSender")
+    receiver      UserMatch[]       @relation("MatchReceiver")
 }
 
 type UserPhotoProfile {
