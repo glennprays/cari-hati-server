@@ -12,7 +12,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { PersonService } from 'src/user/services/person.service';
 import { JwtGuard } from './guards/jwt-auth.guard';
-import { PersonResponseDTO, PersonRegisterDTO } from 'src/user/dtos/person.dto';
+import { PersonRegisterDTO } from 'src/user/dtos/person.dto';
 
 @Controller('auth')
 export class AuthController {
