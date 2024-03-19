@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { XenditService } from './xendit.service';
-import Xendit from 'xendit-node';
+import { XenditClient } from './xendit-client';
 
 @Module({
     providers: [
@@ -8,7 +8,7 @@ import Xendit from 'xendit-node';
         {
             provide: 'XENDIT_CLIENT',
             useFactory: () => {
-                return new Xendit({
+                return new XenditClient({
                     secretKey: process.env.XENDIT_SECRET_KEY,
                 });
             },

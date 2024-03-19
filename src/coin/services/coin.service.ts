@@ -6,24 +6,22 @@ import { XenditService } from 'src/common/xendit/xendit.service';
 export class CoinService {
     constructor(private xenditService: XenditService) {}
 
-    async topupCoin(
-        coinAmount: number,
-        userId: string,
-    ) {
+    async topupCoin(coinAmount: number, userId: string, email: string) {
         // TODO: calculate moneyAmount based on price in database
-        const moneyAmount = 100000; 
+        const moneyAmount = 100000;
         // TODO: get customerName from database
-        const customerName = 'Pragib';
-
         // TODO: update transaction in database
+        // TODO: get customerName from database
 
         const referenceId = randomUUID();
-        return this.xenditService.createPaymentRequestForCoinTopup(
-            moneyAmount,
-            coinAmount,
-            referenceId,
-            customerName,
-            userId,
-        );
+        return this.xenditService.createPaymentRequestVirtualAccount({
+            moneyAmount: moneyAmount,
+            description: `Topup coin for ${coinAmount} coins`,
+            referenceId: referenceId,
+            customerName: '',
+            userId: userId,
+            email: email,
+            metadata: { coin_amount: coinAmount },
+        });
     }
 }
