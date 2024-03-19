@@ -3,6 +3,7 @@ import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Person } from '../models/person.model';
 import { PersonRole } from 'prisma/postgres/generated/client';
 import { hash } from 'argon2';
+import { PersonRegisterDTO } from '../dtos/person.dto';
 
 @Injectable()
 export class PersonService {
@@ -21,6 +22,38 @@ export class PersonService {
                 activatedAt: null,
             },
         });
+    }
+
+    async updatePerson({
+        personId,
+        email,
+        password,
+    }: {
+        personId: string;
+        email?: string;
+        password?: string;
+    }): Promise<Person | null> {
+        const updateData: PersonRegisterDTO & { updatedAt: Date } = {
+            updatedAt: new Date(),
+        };
+
+        if (email) {
+            updateData.email = email;
+        }
+
+        if (password) {
+            const hashedPassword = await hash(password);
+            updateData.password = hashedPassword;
+        }
+
+        let updatedPerson = await this.postgres.person.update({
+            where: {
+                id: personId,
+            },
+            data: updateData,
+        });
+        delete updatedPerson.password;
+        return updatedPerson;
     }
 
     async activatePerson(email: string): Promise<Person | null> {

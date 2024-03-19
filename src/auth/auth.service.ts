@@ -41,6 +41,7 @@ export class AuthService {
             username: person.email,
             sub: {
                 role: person.role,
+                id: person.id,
             },
         };
 
@@ -89,5 +90,25 @@ export class AuthService {
             await this.personService.activatePerson(email);
             return { message: 'Account activation success' };
         }
+    }
+
+    async updatePersonData({
+        personId,
+        email,
+        password,
+    }: {
+        personId: string;
+        email?: string;
+        password?: string;
+    }) {
+        const person = await this.personService.updatePerson({
+            personId: personId,
+            email: email,
+            password: password,
+        });
+        if (email) {
+            return await this.generateToken(person);
+        }
+        return person;
     }
 }
