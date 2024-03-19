@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
@@ -27,6 +27,14 @@ export class UserService {
         description: string,
     ): Promise<User | null> {
         const person = await this.personService.findOneByEmail(data.username);
+        const user = await this.mongoService.user.findUnique({
+            where: {
+                id: person.id,
+            },
+        });
+        if (user) {
+            throw new BadRequestException('User already exist')
+        }
         const userGallery = await this.mongoService.userGallery.create({
             data: {
                 createdAt: new Date(),
