@@ -6,6 +6,12 @@ import { MailModule } from './mail/mail.module';
 import { XenditModule } from './xendit/xendit.module';
 
 @Module({
-    imports: [DatabaseModule, S3Module, FirebaseModule, MailModule, XenditModule],
+    imports: [
+        DatabaseModule,
+        S3Module,
+        FirebaseModule,
+        MailModule,
+        XenditModule,
+    ],
 })
 export class CommonModule {}

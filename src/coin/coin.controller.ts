@@ -10,6 +10,10 @@ export class CoinController {
     @UseGuards(JwtGuard)
     @Post('topup')
     async topUpCoin(@Request() req, @Body() data: CoinTransactionDTO) {
-        return this.coinService.topupCoin(data.coinAmount, req.user.sub.id);
+        return this.coinService.topupCoin(
+            data.coinAmount,
+            req.user.sub.id,
+            req.user.username,
+        );
     }
 }
