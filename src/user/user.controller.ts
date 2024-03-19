@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserResposeDTO } from 'src/user/dtos/user.dts';
+import { UserResposeDTO } from 'src/user/dtos/user.dto';
 
 @Controller('users')
 export class UserController {
@@ -26,7 +26,6 @@ export class UserController {
         @Body() userResposeDTO: UserResposeDTO,
         @Request() req,
     ) {
-        this.userService.findProfileByEmail(req.user);
         const user = await this.userService.inputPersonalData(
             req.user,
             userResposeDTO.name,
