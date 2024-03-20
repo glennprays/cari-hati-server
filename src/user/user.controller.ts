@@ -39,10 +39,7 @@ export class UserController {
 
     @UseGuards(JwtGuard)
     @Patch('profile')
-    async updateUser(
-        @Body() UserUpdateDTO: UserUpdateDTO,
-        @Request() req,
-    ) {
+    async updateUser(@Body() UserUpdateDTO: UserUpdateDTO, @Request() req) {
         return await this.userService.updateUser({
             userId: req.user.sub.id,
             name: UserUpdateDTO.name,

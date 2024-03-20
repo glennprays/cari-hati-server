@@ -4,7 +4,7 @@ import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
 import { Gender } from 'prisma/mongo/generated/client';
-import { UserResposeDTO, UserUpdateDTO } from '../dtos/user.dto';
+import { UserUpdateDTO } from '../dtos/user.dto';
 
 @Injectable()
 export class UserService {
@@ -12,6 +12,16 @@ export class UserService {
         private mongoService: MongoService,
         private personService: PersonService,
     ) {}
+    async findOneById(id: string) {
+        const user = await this.mongoService.user.findUnique({
+            where: { id: id },
+        });
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+        return user;
+    }
+
     async findProfileByEmail(data: PersonTokenPayload) {
         const person = await this.personService.findOneByEmail(data.username);
         const user = await this.mongoService.user.findUnique({
