@@ -5,10 +5,11 @@ import {
     Request,
     Post,
     Body,
+    Patch,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserResposeDTO } from 'src/user/dtos/user.dto';
+import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 
 @Controller('users')
 export class UserController {
@@ -34,5 +35,20 @@ export class UserController {
             userResposeDTO.description,
         );
         return user;
+    }
+
+    @UseGuards(JwtGuard)
+    @Patch('profile')
+    async updateUser(
+        @Body() UserUpdateDTO: UserUpdateDTO,
+        @Request() req,
+    ) {
+        return await this.userService.updateUser({
+            userId: req.user.sub.id,
+            name: UserUpdateDTO.name,
+            gender: UserUpdateDTO.gender,
+            birth: UserUpdateDTO.birth,
+            description: UserUpdateDTO.description,
+        });
     }
 }

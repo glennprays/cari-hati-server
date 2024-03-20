@@ -15,3 +15,10 @@ export class UserResposeDTO {
     photoProfile: UserPhotoProfile;
     passions: UserPassion[];
 }
+
+export class UserUpdateDTO {
+    name?: string;
+    gender?: Gender;
+    birth?: Date;
+    description?: string;
+}
