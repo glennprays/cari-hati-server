@@ -15,139 +15,53 @@ export class XenditClient {
             headers: { Authorization: `Basic ${this.authToken}` },
         });
     }
-    async createVirtualAccountPayment({
-        currency,
-        amount,
-        reference_id,
-        customer,
-        description,
-        customer_name,
-        expires_at,
-        metadata,
-    }: PaymentRequestParameter) {
+
+    async createFixVirtualAccountPayment(
+        virtualAccountRequest: VirtualAccountRequestParameter,
+    ): Promise<VirtualAccountRequestResponse> {
         try {
-            const paymentRequest: PaymentRequest = {
-                currency: currency,
-                amount: amount,
-                reference_id: reference_id,
-                customer: customer,
-                description: description,
-                payment_method: {
-                    type: 'VIRTUAL_ACCOUNT',
-                    reusability: 'ONE_TIME_USE',
-                    virtual_account: {
-                        channel_code: 'BCA',
-                        channel_properties: {
-                            customer_name: customer_name,
-                            expires_at: expires_at,
-                        },
-                    },
-                },
-                metadata: metadata,
-            };
-            const { data, status } = await this.axios.post(
+            const { data } = await this.axios.post(
                 '/callback_virtual_accounts',
-                paymentRequest,
+                virtualAccountRequest,
             );
-            return { data: data, status: status };
+            return data;
         } catch (error) {
-            console.log(error);
-            throw new Error(error);
+            throw new Error(error.message);
         }
     }
 }
 
-export type PaymentRequestParameter = {
-    currency: Currency;
-    amount: number;
-    reference_id: string;
-    customer_name: string;
-    expires_at: string;
-    customer: Customer;
-    description: string;
-    metadata?: object;
+export type VirtualAccountRequestParameter = {
+    external_id: string;
+    bank_code: BankCode;
+    name: string;
+    is_single_use?: boolean;
+    is_closed?: boolean;
+    expected_amount?: number;
+    expiration_date?: string;
 };
 
-export type PaymentRequestStatus =
-    | 'REQUIRES_ACTION'
-    | 'PENDING'
-    | 'SUCCEEDED'
-    | 'FAILED'
-    | 'AWAITING_CAPTURE';
+export type VirtualAccountRequestResponse = {
+    id: string;
+    owner_id: string;
+    external_id: string;
+    account_number: string;
+    bank_code: string;
+    merchant_code: string;
+    name: string;
+    is_closed: string;
+    expected_amount: number;
+    expiration_date: string;
+    is_single_use: boolean;
+    status: VirtualAccountStatus;
+    currency: Currency;
+    country: Country;
+};
+
+export type BankCode = 'BCA' | 'BNI' | 'BRI' | 'MANDIRI';
+
+export type VirtualAccountStatus = 'PENDING' | 'INACTIVE' | 'ACTIVE';
 
 export type Currency = 'IDR';
 
-export class PaymentRequest {
-    currency: Currency;
-    amount: number;
-    reference_id: string;
-    payment_method: PaymentMethod;
-    customer: Customer;
-    description: string;
-    metadata?: object;
-
-    constructor(
-        currency: Currency,
-        amount: number,
-        reference_id: string,
-        payment_method: PaymentMethod,
-    ) {
-        this.currency = currency;
-        this.amount = amount;
-        this.reference_id = reference_id;
-        this.payment_method = payment_method;
-    }
-}
-
-export type CustomerType = 'INDIVIDUAL';
-
-export class Customer {
-    reference_id: string;
-    type: CustomerType;
-    email: string;
-}
-
-export type PaymentMethodType = 'VIRTUAL_ACCOUNT';
-
-export type ReusabilityType = 'ONE_TIME_USE';
-
-export class PaymentMethod {
-    type: PaymentMethodType;
-    reusability: ReusabilityType;
-    virtual_account: VirtualAccount;
-
-    constructor(
-        type: PaymentMethodType,
-        reusability: ReusabilityType,
-        virtual_account: VirtualAccount,
-    ) {
-        this.type = type;
-        this.reusability = reusability;
-        this.virtual_account = virtual_account;
-    }
-}
-
-export type ChannelCode = 'BCA';
-
-export class VirtualAccount {
-    channel_code: ChannelCode;
-    channel_properties: ChannelProperties;
-
-    constructor(
-        channel_code: ChannelCode,
-        channel_properties: ChannelProperties,
-    ) {
-        this.channel_code = channel_code;
-        this.channel_properties = channel_properties;
-    }
-}
-
-export class ChannelProperties {
-    customer_name: string;
-    expires_at: string;
-
-    constructor(customer_name: string, expires_at: string) {
-        this.customer_name = customer_name;
-        this.expires_at = expires_at;
-    }
-}
+export type Country = 'ID';
