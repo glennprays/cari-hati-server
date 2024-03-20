@@ -4,6 +4,7 @@ import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
 import { Gender } from 'prisma/mongo/generated/client';
+import { UserResposeDTO, UserUpdateDTO } from '../dtos/user.dto';
 
 @Injectable()
 export class UserService {
@@ -62,5 +63,47 @@ export class UserService {
                 userGalleryId: userGallery.id,
             },
         });
+    }
+
+    async updateUser({
+        userId,
+        name,
+        gender,
+        birth,
+        description,
+    }: {
+        userId: string;
+        name?: string;
+        gender?: Gender;
+        birth?: Date;
+        description?: string;
+    }): Promise<User | null> {
+        const updateData: UserUpdateDTO & { updatedAt: Date } = {
+            updatedAt: new Date(),
+        };
+
+        if (name) {
+            updateData.name = name;
+        }
+
+        if (gender) {
+            updateData.gender = gender;
+        }
+
+        if (birth) {
+            updateData.birth = birth;
+        }
+
+        if (description) {
+            updateData.description = description;
+        }
+
+        let updateUser = await this.mongoService.user.update({
+            where: {
+                id: userId,
+            },
+            data: updateData,
+        });
+        return updateUser;
     }
 }
