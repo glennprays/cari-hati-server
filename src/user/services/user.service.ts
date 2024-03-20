@@ -11,6 +11,16 @@ export class UserService {
         private mongoService: MongoService,
         private personService: PersonService,
     ) {}
+    async findOneById(id: string) {
+        const user = await this.mongoService.user.findUnique({
+            where: { id: id },
+        });
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+        return user;
+    }
+
     async findProfileByEmail(data: PersonTokenPayload) {
         const person = await this.personService.findOneByEmail(data.username);
         const user = await this.mongoService.user.findUnique({
