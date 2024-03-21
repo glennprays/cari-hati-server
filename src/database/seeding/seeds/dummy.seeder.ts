@@ -42,11 +42,11 @@ export async function dummySeeder(
             birth: '1951-08-17T00:00:00Z',
             description: 'Handsome man from Majalaya',
             passions: [
-                { name: 'Dancing' },
-                { name: 'Singing' },
-                { name: 'Reading' },
-                { name: 'Traveling' },
-                { name: 'Cooking' },
+                { name: 'hiking' },
+                { name: 'camping' },
+                { name: 'biking' },
+                { name: 'running' },
+                { name: 'woodworking' },
             ],
         },
     });
