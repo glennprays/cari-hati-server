@@ -4,10 +4,14 @@ import { Person } from '../models/person.model';
 import { PersonRole } from 'prisma/postgres/generated/client';
 import { hash } from 'argon2';
 import { PersonRegisterDTO } from '../dtos/person.dto';
+import { PersonTokenPayload } from 'src/auth/models/payload.model';
 
 @Injectable()
 export class PersonService {
-    constructor(private postgres: PostgresService) {}
+  
+    constructor(
+        private postgres: PostgresService
+    ) {}
 
     async findOneByEmail(email: string): Promise<Person | null> {
         return this.postgres.person.findUnique({ where: { email: email } });
@@ -61,5 +65,11 @@ export class PersonService {
             where: { email: email },
             data: { activatedAt: new Date() },
         });
+    }
+
+    async findPersonByEmail(data: PersonTokenPayload) {
+        const person = await this.findOneByEmail(data.username);
+        const { password, ...personWithoutPassword } = person;
+        return personWithoutPassword;
     }
 }
