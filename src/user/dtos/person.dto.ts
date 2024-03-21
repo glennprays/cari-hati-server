@@ -7,10 +7,9 @@ export class PersonResponseDTO {
     createdAt: Date;
     activatedAt: Date;
     updatedAt: Date;
-}   
+}
 
 export class PersonRegisterDTO {
     email?: string;
     password?: string;
 }
-

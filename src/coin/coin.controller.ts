@@ -13,7 +13,7 @@ export class CoinController {
     @Post('topup')
     async topUpCoin(@Request() req, @Body() data: TopupRequestDTO) {
         data = plainToInstance(TopupRequestDTO, data);
-        
+
         return this.coinService.topupCoin(data, req.user.sub.id);
     }
 }
