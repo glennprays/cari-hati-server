@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Get,
     Patch,
     Post,
     Request,
@@ -70,5 +71,11 @@ export class AuthController {
             email: registerPersonDTO.email,
             password: registerPersonDTO.password,
         });
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('account')
+    async getProfile(@Request() req) {
+        return this.personService.findPersonByEmail(req.user);
     }
 }
