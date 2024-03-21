@@ -7,7 +7,6 @@ import { PassionFactory } from '../../factories/passion.factory';
 export async function structuralSeeder(
     mongo: MongoClient<PrismaPostgres.PrismaClientOptions, never, DefaultArgs>,
 ): Promise<void> {
-    console.log('in seeder');
     const passions = await PassionFactory.createMany(rawData.passions);
     const createManyPassions = passions.map((passion) =>
         mongo.passion.create({ data: passion }),

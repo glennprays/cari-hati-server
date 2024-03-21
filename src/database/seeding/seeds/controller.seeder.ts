@@ -21,7 +21,6 @@ async function main() {
             await dummySeeder(mongo, postgres);
             break;
         case 'structural':
-            console.log('in controller');
             await structuralSeeder(mongo);
             break;
         default:
