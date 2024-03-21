@@ -1,6 +1,6 @@
 import { PersonRole } from '../models/person.model';
 
-export class PersonResponseDTO {
+export class PersonLoginResponseDTO {
     id: string;
     email: string;
     role: PersonRole;

@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Person } from '../models/person.model';
-import { PersonRole } from 'prisma/postgres/generated/client';
-import { hash } from 'argon2';
-import { PersonRegisterDTO } from '../dtos/person.dto';
 
 @Injectable()
 export class PersonService {

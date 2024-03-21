@@ -11,7 +11,7 @@ import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
