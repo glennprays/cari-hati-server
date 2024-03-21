@@ -1,6 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-// import { PaymentFactory } from 'src/coin/factories/payment.factory';
-// import { PaymentRequest } from 'src/coin/models/payment.model';
+import { Inject, Injectable } from '@nestjs/common';
 import { VirtualAccountRequestParameter, XenditClient } from './xendit-client';
 
 @Injectable()
@@ -10,7 +8,8 @@ export class XenditService {
     async createFixVirtualAccountPayment(
         virtualAccountRequest: VirtualAccountRequestParameter,
     ) {
-        
-        return await this.xenditClient.createFixVirtualAccountPayment(virtualAccountRequest);
+        return await this.xenditClient.createFixVirtualAccountPayment(
+            virtualAccountRequest,
+        );
     }
 }

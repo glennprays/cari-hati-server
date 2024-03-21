@@ -46,7 +46,7 @@ export class PersonService {
             updateData.password = hashedPassword;
         }
 
-        let updatedPerson = await this.postgres.person.update({
+        const updatedPerson = await this.postgres.person.update({
             where: {
                 id: personId,
             },

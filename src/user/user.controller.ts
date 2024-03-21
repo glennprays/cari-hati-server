@@ -39,13 +39,13 @@ export class UserController {
 
     @UseGuards(JwtGuard)
     @Patch('profile')
-    async updateUser(@Body() UserUpdateDTO: UserUpdateDTO, @Request() req) {
+    async updateUser(@Body() userUpdateDTO: UserUpdateDTO, @Request() req) {
         return await this.userService.updateUser({
             userId: req.user.sub.id,
-            name: UserUpdateDTO.name,
-            gender: UserUpdateDTO.gender,
-            birth: UserUpdateDTO.birth,
-            description: UserUpdateDTO.description,
+            name: userUpdateDTO.name,
+            gender: userUpdateDTO.gender,
+            birth: userUpdateDTO.birth,
+            description: userUpdateDTO.description,
         });
     }
 }
