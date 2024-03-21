@@ -69,7 +69,7 @@ export class PersonService {
 
     async findPersonByEmail(data: PersonTokenPayload) {
         const person = await this.findOneByEmail(data.username);
-        const { password, ...personWithoutPassword } = person;
-        return personWithoutPassword;
+        delete person.password
+        return person;
     }
 }
