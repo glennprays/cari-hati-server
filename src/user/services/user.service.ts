@@ -98,7 +98,7 @@ export class UserService {
             updateData.description = description;
         }
 
-        let updateUser = await this.mongoService.user.update({
+        const updateUser = await this.mongoService.user.update({
             where: {
                 id: userId,
             },

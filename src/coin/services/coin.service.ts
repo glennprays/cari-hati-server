@@ -37,7 +37,7 @@ export class CoinService {
         }
 
         // TODO: update transaction in database
-        
+
         return {
             id: payment.id,
             account_number: payment.account_number,
