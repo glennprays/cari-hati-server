@@ -18,7 +18,7 @@ export class UserController {
     @UseGuards(JwtGuard)
     @Get('profile')
     async getProfile(@Request() req) {
-        return this.userService.findProfileByEmail(req.user);
+        return this.userService.findOneById(req.user.sub.id);
     }
 
     @UseGuards(JwtGuard)
