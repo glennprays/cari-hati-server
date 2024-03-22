@@ -7,6 +7,8 @@ import {
     Post,
     Request,
     UseGuards,
+    Res,
+    Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -14,6 +16,7 @@ import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { PersonService } from 'src/user/services/person.service';
 import { JwtGuard } from './guards/jwt-auth.guard';
 import { PersonRegisterDTO } from 'src/user/dtos/person.dto';
+import { tokenExtractorFromCookies } from './strategies/jwt-refresh.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -23,9 +26,19 @@ export class AuthController {
     ) {}
 
     @UseGuards(LocalAuthGuard)
-    @Post('signin')
-    async signIn(@Request() req) {
-        return await this.authService.generateToken(req.user);
+    @Get('signin')
+    async signIn(@Request() req, @Res({ passthrough: true }) res) {
+        return await this.authService.signIn(req.user, res);
+    }
+
+    @UseGuards(JwtRefreshGuard)
+    @Post('signout')
+    async signOut(@Request() req, @Res({ passthrough: true }) res) {
+        const refreshToken = tokenExtractorFromCookies(req);
+        const userId = req.user.sub.id;
+        const response = await this.authService.signOut(userId, refreshToken);
+        res.clearCookie('refresh_token');
+        return response;
     }
 
     @UseGuards(JwtRefreshGuard)
@@ -57,7 +70,7 @@ export class AuthController {
                 'Email activation not sent, please login to resend',
             );
         }
-        return await this.authService.generateToken(person);
+        return await this.authService.generateTokens(person);
     }
 
     @UseGuards(JwtGuard)
@@ -66,7 +79,7 @@ export class AuthController {
         @Body() registerPersonDTO: PersonRegisterDTO,
         @Request() req,
     ) {
-        return await this.authService.updatePersonData({
+        return await this.authService.updateAccount({
             personId: req.user.sub.id,
             email: registerPersonDTO.email,
             password: registerPersonDTO.password,
