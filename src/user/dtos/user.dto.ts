@@ -24,9 +24,6 @@ export class UserUpdateDTO {
 }
 
 export class UserRequestMatchDTO {
-    senderId: string;
     receiverId: string;
-    status: string;
-    ceatedAt: Date;
-    updatedAt: Date;
+    liked?: boolean;
 }

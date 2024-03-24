@@ -58,6 +58,7 @@ export class UserController {
         return await this.userService.userRequestMatch(
             req.user.sub.id,
             userRequestMatchDTO.receiverId,
+            userRequestMatchDTO.liked,
         );
     }
 }

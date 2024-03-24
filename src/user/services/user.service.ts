@@ -104,7 +104,7 @@ export class UserService {
             updateData.description = description;
         }
 
-        let updateUser = await this.mongoService.user.update({
+        const updateUser = await this.mongoService.user.update({
             where: {
                 id: userId,
             },
@@ -125,6 +125,9 @@ export class UserService {
             where: {
                 senderId: senderId,
                 receiverId: receiverId,
+                status: {
+                        not: MatchStatus.ignored,
+                    },
             },
         });
 
