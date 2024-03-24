@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
+import { UserRequestMatchDTO, UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 
 @Controller('users')
 export class UserController {
@@ -47,5 +47,18 @@ export class UserController {
             birth: userUpdateDTO.birth,
             description: userUpdateDTO.description,
         });
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('matches')
+    async requestMatch(
+        @Body() userRequestMatchDTO: UserRequestMatchDTO,
+        @Request() req,
+    ) {
+        return await this.userService.userRequestMatch(
+            req.user.sub.id,
+            userRequestMatchDTO.receiverId,
+            userRequestMatchDTO.liked,
+        );
     }
 }
