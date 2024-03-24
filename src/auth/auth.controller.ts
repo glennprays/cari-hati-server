@@ -23,7 +23,7 @@ export class AuthController {
     ) {}
 
     @UseGuards(LocalAuthGuard)
-    @Post('signin')
+    @Get('signin')
     async signIn(@Request() req) {
         return await this.authService.generateToken(req.user);
     }

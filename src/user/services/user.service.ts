@@ -1,10 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
-import { Gender } from 'prisma/mongo/generated/client';
+import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
+import { UserMatch } from '../features/match/models/match.model';
 
 @Injectable()
 export class UserService {
@@ -12,6 +17,7 @@ export class UserService {
         private mongoService: MongoService,
         private personService: PersonService,
     ) {}
+
     async findOneById(id: string) {
         const user = await this.mongoService.user.findUnique({
             where: { id: id },
@@ -98,12 +104,48 @@ export class UserService {
             updateData.description = description;
         }
 
-        const updateUser = await this.mongoService.user.update({
+        let updateUser = await this.mongoService.user.update({
             where: {
                 id: userId,
             },
             data: updateData,
         });
         return updateUser;
+    }
+
+    async userRequestMatch(
+        senderId: string,
+        receiverId: string,
+        liked?: boolean,
+    ) {
+        if (senderId == receiverId) {
+            throw new BadRequestException('');
+        }
+        const userMatch = await this.mongoService.userMatch.findFirst({
+            where: {
+                senderId: senderId,
+                receiverId: receiverId,
+            },
+        });
+
+        if (userMatch) {
+            throw new BadRequestException('User already have matched data');
+        }
+        return await this.mongoService.userMatch.create({
+            data: {
+                sender: {
+                    connect: {
+                        id: senderId,
+                    },
+                },
+                receiver: {
+                    connect: {
+                        id: receiverId,
+                    },
+                },
+                liked: liked || false,
+                status: MatchStatus.pending,
+            },
+        });
     }
 }
