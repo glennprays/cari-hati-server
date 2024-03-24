@@ -22,8 +22,3 @@ export class UserUpdateDTO {
     birth?: Date;
     description?: string;
 }
-
-export class UserRequestMatchDTO {
-    receiverId: string;
-    liked?: boolean;
-}

@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Get,
     Patch,
     Post,
     Request,
@@ -69,7 +70,7 @@ export class AuthController {
                 'Email activation not sent, please login to resend',
             );
         }
-        return await this.authService.generateToken(person);
+        return await this.authService.generateTokens(person);
     }
 
     @UseGuards(JwtGuard)
