@@ -1,8 +1,4 @@
-import {
-    BadRequestException,
-    Injectable,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
@@ -182,8 +178,8 @@ export class UserService {
                 senderId: senderId,
                 receiverId: receiverId,
                 status: {
-                        not: MatchStatus.ignored,
-                    },
+                    not: MatchStatus.ignored,
+                },
             },
         });
 

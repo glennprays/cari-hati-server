@@ -8,7 +8,6 @@ import {
     Request,
     UseGuards,
     Res,
-    Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -40,7 +39,6 @@ export class AuthController {
         res.clearCookie('refresh_token');
         return response;
     }
-    
 
     @UseGuards(JwtRefreshGuard)
     @Post('refresh')
