@@ -9,7 +9,11 @@ import {
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserRequestMatchDTO, UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
+import {
+    UserRequestMatchDTO,
+    UserResposeDTO,
+    UserUpdateDTO,
+} from 'src/user/dtos/user.dto';
 
 @Controller('users')
 export class UserController {

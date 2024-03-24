@@ -40,7 +40,6 @@ export class AuthController {
         res.clearCookie('refresh_token');
         return response;
     }
-    
 
     @UseGuards(JwtRefreshGuard)
     @Post('refresh')
