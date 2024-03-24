@@ -31,7 +31,8 @@
     "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d ./src/database/data-source.ts",
     "prisma:generate": "npx prisma generate --schema=./prisma/postgres/schema.prisma && npx prisma generate --schema=./prisma/mongo/schema.prisma",
     "prisma:push": "npx prisma db push --schema=./prisma/postgres/schema.prisma && npx prisma db push --schema=./prisma/mongo/schema.prisma",
-    "seed:dummy": "npx prisma db seed -- --mode dummy"
+    "seed:dummy": "npx prisma db seed -- --mode dummy",
+    "seed:structural": "npx prisma db seed -- --mode structural"
   },
   "prisma": {
     "seed": "ts-node src/database/seeding/seeds/controller.seeder.ts"

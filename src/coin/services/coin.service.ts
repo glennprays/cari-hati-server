@@ -17,6 +17,9 @@ export class CoinService {
         const moneyAmount = coinAmount * 100;
 
         const customer = await this.userService.findOneById(userId);
+        if (!customer) {
+            throw new BadRequestException('User not found');
+        }
         const referenceId = `tu-${new Date().toISOString()}-${randomUUID()}`;
         const expirationDate = new Date(
             new Date().getTime() + 2 * 60 * 60 * 1000,

@@ -27,7 +27,6 @@ export class AuthController {
     async signIn(@Request() req) {
         return await this.authService.generateToken(req.user);
     }
-    
 
     @UseGuards(JwtRefreshGuard)
     @Post('refresh')
