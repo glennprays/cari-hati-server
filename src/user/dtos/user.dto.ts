@@ -22,3 +22,11 @@ export class UserUpdateDTO {
     birth?: Date;
     description?: string;
 }
+
+export class UserRequestMatchDTO {
+    senderId: string;
+    receiverId: string;
+    status: string;
+    ceatedAt: Date;
+    updatedAt: Date;
+}
