@@ -19,6 +19,7 @@ export class UserPhotoProfile implements UserPhotoProfileModel {
 }
 
 export class User implements UserModel {
+    refreshTokens: string[];
     id: string;
     name: string;
     gender: Gender;
