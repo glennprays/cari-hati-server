@@ -1,9 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
-import { Gender } from 'prisma/mongo/generated/client';
+import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
 
@@ -13,6 +17,7 @@ export class UserService {
         private mongoService: MongoService,
         private personService: PersonService,
     ) {}
+
     async findOneById(id: string) {
         const user = await this.mongoService.user.findUnique({
             where: { id: id },
@@ -162,5 +167,44 @@ export class UserService {
             data: updateData,
         });
         return updateUser;
+    }
+
+    async userRequestMatch(
+        senderId: string,
+        receiverId: string,
+        liked?: boolean,
+    ) {
+        if (senderId == receiverId) {
+            throw new BadRequestException('');
+        }
+        const userMatch = await this.mongoService.userMatch.findFirst({
+            where: {
+                senderId: senderId,
+                receiverId: receiverId,
+                status: {
+                        not: MatchStatus.ignored,
+                    },
+            },
+        });
+
+        if (userMatch) {
+            throw new BadRequestException('User already have matched data');
+        }
+        return await this.mongoService.userMatch.create({
+            data: {
+                sender: {
+                    connect: {
+                        id: senderId,
+                    },
+                },
+                receiver: {
+                    connect: {
+                        id: receiverId,
+                    },
+                },
+                liked: liked || false,
+                status: MatchStatus.pending,
+            },
+        });
     }
 }
