@@ -9,7 +9,7 @@ import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
 import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
-import { UserMatch } from '../features/match/models/match.model';
+import { hash, verify } from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -22,18 +22,74 @@ export class UserService {
         const user = await this.mongoService.user.findUnique({
             where: { id: id },
         });
-        if (!user) {
-            throw new BadRequestException('User not found');
-        }
         return user;
     }
 
-    async findProfileByEmail(data: PersonTokenPayload) {
-        const person = await this.personService.findOneByEmail(data.username);
-        const user = await this.mongoService.user.findUnique({
-            where: { id: person.id },
+    async addLoginSession(
+        userId: string,
+        refreshToken: string,
+        refreshTokenExpires: Date,
+    ) {
+        refreshToken = await hash(refreshToken);
+        return await this.mongoService.loginSession.upsert({
+            where: {
+                userId: userId,
+            },
+            update: {
+                refreshTokens: {
+                    push: {
+                        token: refreshToken,
+                        expires: refreshTokenExpires,
+                    },
+                },
+            },
+            create: {
+                userId: userId,
+                refreshTokens: {
+                    set: [
+                        {
+                            token: refreshToken,
+                            expires: refreshTokenExpires,
+                        },
+                    ],
+                },
+            },
         });
-        return { person: person, user: user };
+    }
+
+    async removeLoginSession(userId: string, refreshToken: string) {
+        const { refreshTokens } =
+            await this.mongoService.loginSession.findUnique({
+                where: {
+                    userId: userId,
+                },
+                select: {
+                    refreshTokens: true,
+                },
+            });
+        const verifyToken = async (token: string) => {
+            return await verify(token, refreshToken);
+        };
+        const result = [];
+        for (const token of refreshTokens) {
+            if (
+                (await verifyToken(token.token)) ||
+                token.expires < new Date()
+            ) {
+                continue;
+            }
+            result.push(token);
+        }
+        return await this.mongoService.loginSession.update({
+            where: {
+                userId: userId,
+            },
+            data: {
+                refreshTokens: {
+                    set: result,
+                },
+            },
+        });
     }
 
     async inputPersonalData(
