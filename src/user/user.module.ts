@@ -6,11 +6,18 @@ import { PersonService } from './services/person.service';
 import { DatabaseModule } from 'src/common/database/database.module';
 import { UserService } from './services/user.service';
 import { UserController } from './user.controller';
+import { S3Module } from 'src/common/s3/s3.module';
 
 @Module({
     providers: [PersonService, UserService],
     exports: [PersonService, UserService],
-    imports: [MatchModule, PhotoGalleryModule, BlockModule, DatabaseModule],
+    imports: [
+        MatchModule,
+        PhotoGalleryModule,
+        BlockModule,
+        DatabaseModule,
+        S3Module,
+    ],
     controllers: [UserController],
 })
 export class UserModule {}

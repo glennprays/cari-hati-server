@@ -28,16 +28,20 @@ export async function dummySeeder(
         },
     });
 
+    const userGallery = await mongo.userGallery.create({
+        data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+    });
+
     await mongo.user.upsert({
         where: { id: person.id },
         update: {},
         create: {
             id: person.id,
             name: 'Pragib',
-            photoProfile: {
-                path: 'https://randomuser.me/api/portraits',
-                updatedAt: new Date(),
-            },
+            photoProfile: null,
             gender: 'male',
             birth: '1951-08-17T00:00:00Z',
             description: 'Handsome man from Majalaya',
@@ -48,6 +52,7 @@ export async function dummySeeder(
                 { name: 'running' },
                 { name: 'woodworking' },
             ],
+            userGalleryId: userGallery.id,
         },
     });
 }
