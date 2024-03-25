@@ -25,7 +25,6 @@ export class S3Service implements OnModuleInit {
         if (!bucketStatus) {
             throw new Error('Bucket is not exist');
         }
-        console.log();
         console.log('Connection to S3...');
     }
 

@@ -7,7 +7,7 @@ import {
 import { PersonService } from 'src/user/services/person.service';
 import { verify } from 'argon2';
 import { JwtService } from '@nestjs/jwt';
-import { PersonResponseDTO } from 'src/user/dtos/person.dto';
+import { PersonRegisterDTO, PersonResponseDTO } from 'src/user/dtos/person.dto';
 import { PersonTokenPayload } from './models/payload.model';
 import { MailService } from 'src/common/mail/mail.service';
 import { RedisService } from 'src/common/database/redis/redis.service';
@@ -80,6 +80,42 @@ export class AuthService {
         return response;
     }
 
+    async register(
+        { email, password }: PersonRegisterDTO,
+        @Res({ passthrough: true }) res,
+    ) {
+        try {
+            const person = await this.personService.inputPerson(
+                email,
+                password,
+            );
+            delete person.password;
+            const status = await this.sendVerificationEmail(email);
+            if (!status) {
+                throw new BadRequestException(
+                    'Email activation not sent, please login to resend',
+                );
+            }
+            const { refresh_token, access_token } =
+                await this.generateTokens(person);
+
+            const tokenExpires = new Date(
+                new Date().getTime() + 30 * 24 * 60 * 60 * 1000,
+            );
+            await this.userService.addLoginSession(
+                person.id,
+                refresh_token,
+                tokenExpires,
+            );
+            res.cookie('refresh_token', refresh_token, {
+                expires: tokenExpires,
+            });
+            return { access_token, person };
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
+
     async signOut(userId: string, refreshToken: string) {
         await this.userService.removeLoginSession(userId, refreshToken);
         return { message: 'Sign out success' };
@@ -88,6 +124,10 @@ export class AuthService {
     async refreshToken(payload: PersonTokenPayload) {
         const accessToken = this.jwtService.sign(payload);
         return { access_token: accessToken };
+    }
+
+    async validateRefreshToken(userId: string, token: string) {
+        return await this.userService.findRefreshToken(userId, token);
     }
 
     async sendVerificationEmail(email: string) {
