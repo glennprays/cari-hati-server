@@ -1,4 +1,5 @@
 import {
+    DeleteObjectCommand,
     ListBucketsCommand,
     PutObjectCommand,
     S3Client,
@@ -33,6 +34,19 @@ export class S3Service implements OnModuleInit {
             Bucket: this.bucketName,
             Key: key,
             Body: body.buffer,
+        });
+        try {
+            const response = await this.s3Client.send(command);
+            return response;
+        } catch (error) {
+            throw new NotAcceptableException(error);
+        }
+    }
+
+    async deleteAObject(key: string) {
+        const command = new DeleteObjectCommand({
+            Bucket: this.bucketName,
+            Key: key,
         });
         try {
             const response = await this.s3Client.send(command);

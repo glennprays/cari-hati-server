@@ -9,6 +9,7 @@ import {
     UseInterceptors,
     UploadedFile,
     Put,
+    Delete,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -65,6 +66,12 @@ export class UserController {
         @Request() req,
     ) {
         return this.userService.updateUserPhotoProfile(req.user.sub.id, image);
+    }
+
+    @UseGuards(JwtGuard)
+    @Delete('profile/photo')
+    async deleteUserPhotoProfile(@Request() req) {
+        return this.userService.deleteUserPhotoProfile(req.user.sub.id);
     }
 
     @UseGuards(JwtGuard)

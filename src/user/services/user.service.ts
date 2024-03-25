@@ -234,4 +234,24 @@ export class UserService {
             throw new BadRequestException(error);
         }
     }
+
+    async deleteUserPhotoProfile(userId: string) {
+        try {
+            const user = await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    photoProfile: null,
+                },
+                select: {
+                    photoProfile: true,
+                },
+            });
+            await this.s3Service.deleteAObject(user.photoProfile.path);
+            return { message: 'Photo profile deleted' };
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
 }
