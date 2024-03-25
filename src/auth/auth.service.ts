@@ -90,6 +90,10 @@ export class AuthService {
         return { access_token: accessToken };
     }
 
+    async validateRefreshToken(userId: string, token: string) {
+        return await this.userService.findRefreshToken(userId, token);
+    }
+
     async sendVerificationEmail(email: string) {
         const person = await this.personService.findOneByEmail(email);
         if (!person) {

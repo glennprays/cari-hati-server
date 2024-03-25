@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
@@ -22,7 +26,30 @@ export class UserService {
         const user = await this.mongoService.user.findUnique({
             where: { id: id },
         });
+        if (user.photoProfile) {
+            user.photoProfile.path = `${process.env.S3_BUCKET_URL}/${user.photoProfile.path}`;
+        }
         return user;
+    }
+
+    async findRefreshToken(userId: string, refreshToken: string) {
+        const loginSession = await this.mongoService.loginSession.findFirst({
+            where: {
+                userId: userId,
+            },
+        });
+        const verifyToken = async (token: string) => {
+            return await verify(token, refreshToken);
+        };
+        const status = loginSession.refreshTokens.some(async (token) => {
+            return (
+                (await verifyToken(token.token)) && token.expires > new Date()
+            );
+        });
+        if (!status) {
+            throw new UnauthorizedException();
+        }
+        return loginSession;
     }
 
     async addLoginSession(

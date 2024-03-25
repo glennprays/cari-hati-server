@@ -26,11 +26,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
             ]),
             ignoreExpiration: false,
             secretOrKey: `${process.env.JWT_REFRESH_TOKEN_SECRET}`,
+            passReqToCallback: true,
         });
     }
 
-    async validate(payload: any): Promise<PersonTokenPayload> {
+    async validate(req: Request, payload: any): Promise<PersonTokenPayload> {
+        const token = tokenExtractorFromCookies(req);
         const { sub, username } = payload;
+
         return { sub, username };
     }
 }
