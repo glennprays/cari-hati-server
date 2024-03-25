@@ -3,15 +3,18 @@ import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
-import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
+import { Gender, MatchStatus, UserMatch } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
 
 @Injectable()
 export class UserService {
+    // userMatch: any;
+    // userMatch: any;
     constructor(
         private mongoService: MongoService,
         private personService: PersonService,
+        // private userMatch: UserMatch
     ) {}
 
     async findOneById(id: string) {
@@ -118,6 +121,13 @@ export class UserService {
                 birth: birth,
                 description: description,
                 photoProfile: null,
+                LoginSession: {
+                    create: {
+                        refreshTokens: {
+                            set: [],
+                        },
+                    },
+                },
                 userGalleryId: userGallery.id,
             },
         });
@@ -203,4 +213,26 @@ export class UserService {
             },
         });
     }
+
+    async findAllMatchesByUserId(userId: string) {
+        const userMatches = await this.mongoService.userMatch.findMany({
+            where: {
+                OR: [
+                    { senderId: userId },
+                    { receiverId: userId }
+                ]
+            }
+        });
+        // delete userMatches.senderId; error mun kieu
+        const filteredUserMatches = userMatches.map(match => {
+            const { senderId, ...rest } = match;
+            return rest;
+        });
+    
+        return filteredUserMatches;
+    
+        // return userMatches;
+    }
+    
+
 }

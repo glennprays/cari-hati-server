@@ -65,4 +65,11 @@ export class UserController {
             userRequestMatchDTO.liked,
         );
     }
+
+       @UseGuards(JwtGuard)
+    @Get('mathces')
+    async getUserMatch(@Request() req) {
+        return this.userService.findAllMatchesByUserId(req.user.sub.id);
+    }
+
 }
