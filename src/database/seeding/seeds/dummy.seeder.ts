@@ -41,10 +41,7 @@ export async function dummySeeder(
         create: {
             id: person.id,
             name: 'Pragib',
-            photoProfile: {
-                path: 'https://randomuser.me/api/portraits',
-                updatedAt: new Date(),
-            },
+            photoProfile: null,
             gender: 'male',
             birth: '1951-08-17T00:00:00Z',
             description: 'Handsome man from Majalaya',
