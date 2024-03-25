@@ -31,7 +31,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
     }
 
     async validate(req: Request, payload: any): Promise<PersonTokenPayload> {
-        const token = tokenExtractorFromCookies(req);
         const { sub, username } = payload;
 
         return { sub, username };
