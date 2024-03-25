@@ -6,12 +6,16 @@ import { User } from '../models/user.model';
 import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
+import { S3Service } from 'src/common/s3/s3.service';
+import { randomUUID } from 'node:crypto';
+import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 
 @Injectable()
 export class UserService {
     constructor(
         private mongoService: MongoService,
         private personService: PersonService,
+        private s3Service: S3Service,
     ) {}
 
     async findOneById(id: string) {
@@ -202,5 +206,32 @@ export class UserService {
                 status: MatchStatus.pending,
             },
         });
+    }
+
+    async updateUserPhotoProfile(userId: string, image: Express.Multer.File) {
+        const filename = `${randomUUID()}.jpg`;
+
+        try {
+            image = await compressAndConvertToJPEG(image);
+            image = await resizeImage(image);
+            const user = await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    photoProfile: {
+                        path: filename,
+                        updatedAt: new Date(),
+                    },
+                },
+                select: {
+                    photoProfile: true,
+                },
+            });
+            await this.s3Service.uploadAObject(filename, image);
+            return user;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
     }
 }

@@ -6,6 +6,9 @@ import {
     Post,
     Body,
     Patch,
+    UseInterceptors,
+    UploadedFile,
+    Put,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -14,6 +17,7 @@ import {
     UserResposeDTO,
     UserUpdateDTO,
 } from 'src/user/dtos/user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UserController {
@@ -51,6 +55,16 @@ export class UserController {
             birth: userUpdateDTO.birth,
             description: userUpdateDTO.description,
         });
+    }
+
+    @UseGuards(JwtGuard)
+    @Put('profile/photo')
+    @UseInterceptors(FileInterceptor('image'))
+    async updateUserPhotoProfile(
+        @UploadedFile() image: Express.Multer.File,
+        @Request() req,
+    ) {
+        return this.userService.updateUserPhotoProfile(req.user.sub.id, image);
     }
 
     @UseGuards(JwtGuard)
