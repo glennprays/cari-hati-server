@@ -8,10 +8,7 @@ import { PersonTokenPayload } from 'src/auth/models/payload.model';
 
 @Injectable()
 export class PersonService {
-  
-    constructor(
-        private postgres: PostgresService
-    ) {}
+    constructor(private postgres: PostgresService) {}
 
     async findOneByEmail(email: string): Promise<Person | null> {
         return this.postgres.person.findUnique({ where: { email: email } });
@@ -69,7 +66,7 @@ export class PersonService {
 
     async findPersonByEmail(data: PersonTokenPayload) {
         const person = await this.findOneByEmail(data.username);
-        delete person.password
+        delete person.password;
         return person;
     }
 }
