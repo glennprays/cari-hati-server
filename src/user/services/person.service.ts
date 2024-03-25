@@ -1,28 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Person } from '../models/person.model';
 import { PersonRole } from 'prisma/postgres/generated/client';
 import { hash } from 'argon2';
 import { PersonRegisterDTO } from '../dtos/person.dto';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
+import { MongoService } from 'src/common/database/mongo/mongo.service';
 
 @Injectable()
 export class PersonService {
-    constructor(private postgres: PostgresService) {}
+    constructor(
+        private postgres: PostgresService,
+        private mongoService: MongoService,
+    ) {}
 
     async findOneByEmail(email: string): Promise<Person | null> {
         return this.postgres.person.findUnique({ where: { email: email } });
     }
 
     async inputPerson(email: string, password: string): Promise<Person | null> {
-        return await this.postgres.person.create({
-            data: {
-                email: email,
-                password: await hash(password),
-                role: PersonRole.user,
-                activatedAt: null,
-            },
-        });
+        try {
+            const person = await this.postgres.person.create({
+                data: {
+                    email: email,
+                    password: await hash(password),
+                    role: PersonRole.user,
+                    activatedAt: null,
+                },
+            });
+            await this.mongoService.user.create({
+                data: {
+                    id: person.id,
+                    passions: {
+                        set: [],
+                    },
+                    LoginSession: {
+                        create: {
+                            refreshTokens: {
+                                token: '',
+                                expires: new Date(),
+                            },
+                        },
+                    },
+                    userGallery: {
+                        create: {
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                        },
+                    },
+                },
+            });
+            return person;
+        } catch (error) {
+            throw new BadRequestException('Email already exists');
+        }
     }
 
     async updatePerson({
