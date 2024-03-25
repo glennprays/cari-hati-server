@@ -12,13 +12,10 @@ import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 
 @Injectable()
 export class UserService {
-    // userMatch: any;
-    // userMatch: any;
     constructor(
         private mongoService: MongoService,
         private personService: PersonService,
         private s3Service: S3Service,
-        // private userMatch: UserMatch
     ) {}
 
     async findOneById(id: string) {
@@ -274,7 +271,6 @@ export class UserService {
                 ]
             }
         });
-        // delete userMatches.senderId; error mun kieu
         const filteredUserMatches = userMatches.map(match => {
             const { senderId, ...rest } = match;
             return rest;
@@ -282,7 +278,6 @@ export class UserService {
     
         return filteredUserMatches;
     
-        // return userMatches;
     }
     
 
