@@ -28,6 +28,13 @@ export async function dummySeeder(
         },
     });
 
+    const userGallery = await mongo.userGallery.create({
+        data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+    });
+
     await mongo.user.upsert({
         where: { id: person.id },
         update: {},
@@ -48,6 +55,7 @@ export async function dummySeeder(
                 { name: 'running' },
                 { name: 'woodworking' },
             ],
+            userGalleryId: userGallery.id,
         },
     });
 }
