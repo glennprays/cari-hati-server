@@ -37,7 +37,7 @@ export class UserController {
         @Request() req,
     ) {
         const user = await this.userService.inputPersonalData(
-            req.user,
+            req.user.sub.id,
             userResposeDTO.name,
             userResposeDTO.gender,
             userResposeDTO.birth,
