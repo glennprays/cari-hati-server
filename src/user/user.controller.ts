@@ -38,7 +38,7 @@ export class UserController {
         @Request() req,
     ) {
         const user = await this.userService.inputPersonalData(
-            req.user,
+            req.user.sub.id,
             userResposeDTO.name,
             userResposeDTO.gender,
             userResposeDTO.birth,
@@ -91,12 +91,12 @@ export class UserController {
        @UseGuards(JwtGuard)
     @Get('matches')
     async getUserMatch(
-        @Body() UserGetAllMatchDTO: UserGetAllMatchDTO,
+        @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
         @Request() req
         ) {
         return this.userService.findAllMatchesByUserId(
             req.user.sub.id,
-            UserGetAllMatchDTO.accepted_only,
+            userGetAllMatchDTO.accepted_only,
             );
     }
 

@@ -10,16 +10,15 @@ datasource db {
 
 model User {
     id            String            @id @map("_id")
-    name          String
+    name          String?
     photoProfile  UserPhotoProfile?
-    gender        Gender
-    birth         DateTime          @db.Date
-    description   String
+    gender        Gender?
+    birth         DateTime?         @db.Date
+    description   String?
     coinAmount    Int               @default(0)
     passions      UserPassion[]
-    refreshTokens String[]          @unique @default([]) @map("refresh_tokens")
-    createdAt     DateTime          @default(now())
-    updatedAt     DateTime          @default(now())
+    createdAt     DateTime?         @default(now())
+    updatedAt     DateTime?         @default(now())
     userGallery   UserGallery?      @relation("UserGallery", fields: [userGalleryId], references: [id])
     userGalleryId String?           @unique @db.ObjectId
     Notification  Notification[]    @relation("Notification")
