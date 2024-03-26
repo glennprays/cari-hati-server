@@ -3,7 +3,7 @@ import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
-import { Gender, MatchStatus, UserMatch } from 'prisma/mongo/generated/client';
+import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
@@ -262,23 +262,19 @@ export class UserService {
         }
     }
 
-    async findAllMatchesByUserId(userId: string) {
-        const userMatches = await this.mongoService.userMatch.findMany({
-            where: {
-                OR: [
-                    { senderId: userId },
-                    { receiverId: userId }
-                ]
-            }
-        });
-        const filteredUserMatches = userMatches.map(match => {
-            const { senderId, ...rest } = match;
-            return rest;
-        });
-    
-        return filteredUserMatches;
-    
-    }
-    
+    async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
+        let whereClause: any = {
+            OR: [{ senderId: userId }, { receiverId: userId }],
+        };
 
+        if (accepted_only) {
+            whereClause.status = MatchStatus.accepted;
+        }
+
+        const userMatches = await this.mongoService.userMatch.findMany({
+            where: whereClause,
+        });
+
+        return userMatches;
+    }
 }

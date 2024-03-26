@@ -27,3 +27,12 @@ export class UserRequestMatchDTO {
     receiverId: string;
     liked?: boolean;
 }
+
+export class UserUnmatchMatchDTO {
+    receiverId: string;
+}
+
+export class UserGetAllMatchDTO {
+    accepted_only : boolean;
+}
+
