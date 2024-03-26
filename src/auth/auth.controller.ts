@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Body,
     Controller,
     Get,
@@ -43,6 +42,10 @@ export class AuthController {
     @UseGuards(JwtRefreshGuard)
     @Post('refresh')
     async refreshToken(@Request() req) {
+        await this.authService.validateRefreshToken(
+            req.user.sub.id,
+            tokenExtractorFromCookies(req),
+        );
         return await this.authService.refreshToken(req.user);
     }
 
@@ -56,20 +59,11 @@ export class AuthController {
     }
 
     @Post('register')
-    async register(@Body() registerPersonDTO: PersonRegisterDTO) {
-        const person = await this.personService.inputPerson(
-            registerPersonDTO.email,
-            registerPersonDTO.password,
-        );
-        const status = await this.authService.sendVerificationEmail(
-            registerPersonDTO.email,
-        );
-        if (!status) {
-            throw new BadRequestException(
-                'Email activation not sent, please login to resend',
-            );
-        }
-        return await this.authService.generateTokens(person);
+    async register(
+        @Body() registerPersonDTO: PersonRegisterDTO,
+        @Res({ passthrough: true }) res,
+    ) {
+        return await this.authService.register(registerPersonDTO, res);
     }
 
     @UseGuards(JwtGuard)
