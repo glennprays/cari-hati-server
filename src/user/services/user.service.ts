@@ -296,4 +296,32 @@ export class UserService {
 
         return userMatches;
     }
+
+    async unmatchWithUser(currentUser: string, targetUser: string) {
+        try {
+            const unmatch = await this.mongoService.userMatch.deleteMany({
+                where: {
+                    OR: [
+                        {
+                            senderId: currentUser,
+                            receiverId: targetUser,
+                        },
+                        {
+                            senderId: targetUser,
+                            receiverId: currentUser,
+                        },
+                    ],
+                    status: MatchStatus.accepted,
+                },
+            });
+
+            if (unmatch.count === 0) {
+                throw new Error('Unmatch Failed');
+            }
+
+            return { message: 'Unmatched successfully' };
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
 }
