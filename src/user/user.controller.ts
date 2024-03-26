@@ -14,6 +14,7 @@ import {
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
+    UserGetAllMatchDTO,
     UserRequestMatchDTO,
     UserResposeDTO,
     UserUpdateDTO,
@@ -88,9 +89,15 @@ export class UserController {
     }
 
        @UseGuards(JwtGuard)
-    @Get('mathces')
-    async getUserMatch(@Request() req) {
-        return this.userService.findAllMatchesByUserId(req.user.sub.id);
+    @Get('matches')
+    async getUserMatch(
+        @Body() UserGetAllMatchDTO: UserGetAllMatchDTO,
+        @Request() req
+        ) {
+        return this.userService.findAllMatchesByUserId(
+            req.user.sub.id,
+            UserGetAllMatchDTO.accepted_only,
+            );
     }
 
 }
