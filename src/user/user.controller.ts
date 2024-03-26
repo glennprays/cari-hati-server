@@ -14,6 +14,7 @@ import {
 import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
+    UserGetAllMatchDTO,
     UserRequestMatchDTO,
     UserResposeDTO,
     UserUpdateDTO,
@@ -86,4 +87,17 @@ export class UserController {
             userRequestMatchDTO.liked,
         );
     }
+
+       @UseGuards(JwtGuard)
+    @Get('matches')
+    async getUserMatch(
+        @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
+        @Request() req
+        ) {
+        return this.userService.findAllMatchesByUserId(
+            req.user.sub.id,
+            userGetAllMatchDTO.accepted_only,
+            );
+    }
+
 }

@@ -280,4 +280,20 @@ export class UserService {
             throw new BadRequestException(error);
         }
     }
+
+    async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
+        let whereClause: any = {
+            OR: [{ senderId: userId }, { receiverId: userId }],
+        };
+
+        if (accepted_only) {
+            whereClause.status = MatchStatus.accepted;
+        }
+
+        const userMatches = await this.mongoService.userMatch.findMany({
+            where: whereClause,
+        });
+
+        return userMatches;
+    }
 }
