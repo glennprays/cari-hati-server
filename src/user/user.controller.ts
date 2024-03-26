@@ -17,6 +17,7 @@ import {
     UserGetAllMatchDTO,
     UserRequestMatchDTO,
     UserResposeDTO,
+    UserUnmatchMatchDTO,
     UserUpdateDTO,
 } from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -99,5 +100,18 @@ export class UserController {
             userGetAllMatchDTO.accepted_only,
             );
     }
+    
+    @UseGuards(JwtGuard)
+    @Delete('matches')
+    async unmatchWithUser(
+        @Body() userUnmatchtMatchDTO: UserUnmatchMatchDTO,
+        @Request() req,
+        ) {
+        return this.userService.unmatchWithUser(
+            req.user.sub.id,
+            userUnmatchtMatchDTO.receiverId,
+            );
+    }
+
 
 }
