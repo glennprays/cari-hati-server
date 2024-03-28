@@ -10,9 +10,11 @@ import { NotificationModule } from './notification/notification.module';
 import { CoinModule } from './coin/coin.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
+import { MatchModule } from './user/features/match/match.module';
 
 @Module({
     imports: [
+        MatchModule,
         UserModule,
         CommonModule,
         ChatModule,
