@@ -4,7 +4,6 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
-import { PersonService } from './person.service';
 import { User } from '../models/user.model';
 import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
@@ -17,7 +16,6 @@ import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 export class UserService {
     constructor(
         private mongoService: MongoService,
-        private personService: PersonService,
         private s3Service: S3Service,
     ) {}
 
@@ -195,44 +193,7 @@ export class UserService {
         return updateUser;
     }
 
-    async userRequestMatch(
-        senderId: string,
-        receiverId: string,
-        liked?: boolean,
-    ) {
-        if (senderId == receiverId) {
-            throw new BadRequestException('');
-        }
-        const userMatch = await this.mongoService.userMatch.findFirst({
-            where: {
-                senderId: senderId,
-                receiverId: receiverId,
-                status: {
-                    not: MatchStatus.ignored,
-                },
-            },
-        });
-
-        if (userMatch) {
-            throw new BadRequestException('User already have matched data');
-        }
-        return await this.mongoService.userMatch.create({
-            data: {
-                sender: {
-                    connect: {
-                        id: senderId,
-                    },
-                },
-                receiver: {
-                    connect: {
-                        id: receiverId,
-                    },
-                },
-                liked: liked || false,
-                status: MatchStatus.pending,
-            },
-        });
-    }
+   
 
     async updateUserPhotoProfile(userId: string, image: Express.Multer.File) {
         const filename = `${randomUUID()}.jpg`;
@@ -289,39 +250,11 @@ export class UserService {
         if (accepted_only) {
             whereClause.status = MatchStatus.accepted;
         }
-
+        
         const userMatches = await this.mongoService.userMatch.findMany({
             where: whereClause,
         });
 
         return userMatches;
-    }
-
-    async unmatchWithUser(currentUser: string, targetUser: string) {
-        try {
-            const unmatch = await this.mongoService.userMatch.deleteMany({
-                where: {
-                    OR: [
-                        {
-                            senderId: currentUser,
-                            receiverId: targetUser,
-                        },
-                        {
-                            senderId: targetUser,
-                            receiverId: currentUser,
-                        },
-                    ],
-                    status: MatchStatus.accepted,
-                },
-            });
-
-            if (unmatch.count === 0) {
-                throw new Error('Unmatch Failed');
-            }
-
-            return { message: 'Unmatched successfully' };
-        } catch (error) {
-            throw new BadRequestException(error.message);
-        }
     }
 }

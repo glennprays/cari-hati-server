@@ -24,7 +24,7 @@ export class AuthController {
     ) {}
 
     @UseGuards(LocalAuthGuard)
-    @Get('signin')
+    @Post('signin')
     async signIn(@Request() req, @Res({ passthrough: true }) res) {
         return await this.authService.signIn(req.user, res);
     }
