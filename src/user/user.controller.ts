@@ -11,19 +11,13 @@ import {
     Put,
     Delete,
 } from '@nestjs/common';
-import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import {
-    UserGetAllMatchDTO,
-    UserRequestMatchDTO,
-    UserResposeDTO,
-    UserUnmatchMatchDTO,
-    UserUpdateDTO,
-} from 'src/user/dtos/user.dto';
+import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserService } from './services/user.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 
-@Controller('users')
+@Controller('')
 export class UserController {
     constructor(private userService: UserService) {}
 
@@ -75,43 +69,6 @@ export class UserController {
     @Delete('profile/photo')
     async deleteUserPhotoProfile(@Request() req) {
         return this.userService.deleteUserPhotoProfile(req.user.sub.id);
-    }
-
-    @UseGuards(JwtGuard)
-    @Post('matches')
-    async requestMatch(
-        @Body() userRequestMatchDTO: UserRequestMatchDTO,
-        @Request() req,
-    ) {
-        return await this.userService.userRequestMatch(
-            req.user.sub.id,
-            userRequestMatchDTO.receiverId,
-            userRequestMatchDTO.liked,
-        );
-    }
-
-    @UseGuards(JwtGuard)
-    @Get('matches')
-    async getUserMatch(
-        @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
-        @Request() req,
-    ) {
-        return this.userService.findAllMatchesByUserId(
-            req.user.sub.id,
-            userGetAllMatchDTO.accepted_only,
-        );
-    }
-
-    @UseGuards(JwtGuard)
-    @Delete('matches')
-    async unmatchWithUser(
-        @Body() userUnmatchtMatchDTO: UserUnmatchMatchDTO,
-        @Request() req,
-    ) {
-        return this.userService.unmatchWithUser(
-            req.user.sub.id,
-            userUnmatchtMatchDTO.receiverId,
-        );
     }
 
     // DEBUG: this just for testing firebase messaging
