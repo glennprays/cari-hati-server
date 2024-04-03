@@ -21,17 +21,17 @@ import { FirebaseModule } from 'src/common/firebase/firebase.module';
         S3Module,
         RouterModule.register([
             {
-              path: 'users',
-              module: UserModule,
-              children: [
-                {
-                  path: 'matches',
-                  module: MatchModule,
-                },
-              ],
+                path: 'users',
+                module: UserModule,
+                children: [
+                    {
+                        path: 'matches',
+                        module: MatchModule,
+                    },
+                ],
             },
-          ])
-            FirebaseModule,
+        ]),
+        FirebaseModule,
     ],
     controllers: [UserController],
 })
