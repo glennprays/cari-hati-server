@@ -8,6 +8,7 @@ import { UserService } from './services/user.service';
 import { UserController } from './user.controller';
 import { S3Module } from 'src/common/s3/s3.module';
 import { RouterModule } from '@nestjs/core';
+import { FirebaseModule } from 'src/common/firebase/firebase.module';
 
 @Module({
     providers: [PersonService, UserService],
@@ -30,7 +31,8 @@ import { RouterModule } from '@nestjs/core';
               ],
             },
           ])
-        ],
+            FirebaseModule,
+    ],
     controllers: [UserController],
 })
 export class UserModule {}
