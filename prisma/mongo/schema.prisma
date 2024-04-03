@@ -30,15 +30,20 @@ model User {
 }
 
 model LoginSession {
-    id            String         @id @default(auto()) @map("_id") @db.ObjectId
-    userId        String         @unique
-    user          User           @relation(fields: [userId], references: [id])
-    refreshTokens RefreshToken[] @unique @map("refresh_tokens")
+    id     String      @id @default(auto()) @map("_id") @db.ObjectId
+    userId String      @unique
+    user   User        @relation(fields: [userId], references: [id])
+    data   LoginData[] @unique @map("login_data")
 }
 
 type RefreshToken {
     token   String
     expires DateTime @default(now())
+}
+
+type LoginData {
+    refreshToken RefreshToken @map("refresh_token")
+    fcmToken     String       @map("fcm_token")
 }
 
 type UserPhotoProfile {
