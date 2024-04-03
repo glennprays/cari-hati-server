@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { MatchStatus } from 'prisma/mongo/generated/client';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { UserMatch } from './models/match.model';
-import { UserUpdateStatusMatchDTO } from 'src/user/dtos/user.dto';
 
 @Injectable()
 export class MatchService {
