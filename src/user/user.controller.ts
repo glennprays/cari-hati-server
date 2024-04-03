@@ -12,12 +12,10 @@ import {
     Delete,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import {
-    UserResposeDTO,
-    UserUpdateDTO,
-} from 'src/user/dtos/user.dto';
+import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './services/user.service';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 
 @Controller('')
 export class UserController {
@@ -71,5 +69,11 @@ export class UserController {
     @Delete('profile/photo')
     async deleteUserPhotoProfile(@Request() req) {
         return this.userService.deleteUserPhotoProfile(req.user.sub.id);
+    }
+
+    // DEBUG: this just for testing firebase messaging
+    @Post('notification')
+    async sendNotificationToUser(@Body() message: Message) {
+        return await this.userService.sendNotificationToUser(message);
     }
 }

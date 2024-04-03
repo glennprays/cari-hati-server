@@ -13,8 +13,9 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { PersonService } from 'src/user/services/person.service';
 import { JwtGuard } from './guards/jwt-auth.guard';
-import { PersonRegisterDTO } from 'src/user/dtos/person.dto';
+import { PersonDTO } from 'src/user/dtos/person.dto';
 import { tokenExtractorFromCookies } from './strategies/jwt-refresh.strategy';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('auth')
 export class AuthController {
@@ -24,9 +25,13 @@ export class AuthController {
     ) {}
 
     @UseGuards(LocalAuthGuard)
-    @Post('signin')
-    async signIn(@Request() req, @Res({ passthrough: true }) res) {
-        return await this.authService.signIn(req.user, res);
+    @Get('signin')
+    async signIn(
+        @Body() data: { fcm_token: string },
+        @Request() req,
+        @Res({ passthrough: true }) res,
+    ) {
+        return await this.authService.signIn(req.user, data.fcm_token, res);
     }
 
     @UseGuards(JwtRefreshGuard)
@@ -60,18 +65,16 @@ export class AuthController {
 
     @Post('register')
     async register(
-        @Body() registerPersonDTO: PersonRegisterDTO,
+        @Body() registerPersonDTO: PersonDTO,
         @Res({ passthrough: true }) res,
     ) {
+        registerPersonDTO = plainToInstance(PersonDTO, registerPersonDTO);
         return await this.authService.register(registerPersonDTO, res);
     }
 
     @UseGuards(JwtGuard)
     @Patch('account')
-    async updatePerson(
-        @Body() registerPersonDTO: PersonRegisterDTO,
-        @Request() req,
-    ) {
+    async updatePerson(@Body() registerPersonDTO: PersonDTO, @Request() req) {
         return await this.authService.updateAccount({
             personId: req.user.sub.id,
             email: registerPersonDTO.email,
