@@ -6,7 +6,7 @@ import {
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
 import { User } from '../models/user.model';
-import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
+import { Gender, LoginData, MatchStatus } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
@@ -35,29 +35,41 @@ export class UserService {
     }
 
     async findRefreshToken(userId: string, refreshToken: string) {
-        const loginSession = await this.mongoService.loginSession.findFirst({
+        const loginData = await this.mongoService.loginSession.findFirst({
             where: {
                 userId: userId,
             },
+            select: {
+                data: {
+                    select: {
+                        refreshToken: true,
+                    },
+                },
+            },
         });
-        const verifyToken = async (token: string) => {
-            return token ? await verify(token, refreshToken) : false;
-        };
-        const status = loginSession.refreshTokens.some(async (token) => {
-            return (
-                (await verifyToken(token.token)) && token.expires > new Date()
-            );
-        });
-        if (!status) {
+
+        const refreshTokens = loginData.data.map((val) => val.refreshToken);
+
+        let token = null;
+        for (const data of refreshTokens) {
+            if (
+                (await verify(data.token, refreshToken)) &&
+                data.expires > new Date()
+            ) {
+                token = data;
+            }
+        }
+        if (!token) {
             throw new UnauthorizedException();
         }
-        return loginSession;
+        return token;
     }
 
     async addLoginSession(
         userId: string,
         refreshToken: string,
         refreshTokenExpires: Date,
+        fcmToken: string,
     ) {
         refreshToken = await hash(refreshToken);
         return await this.mongoService.loginSession.upsert({
@@ -65,63 +77,64 @@ export class UserService {
                 userId: userId,
             },
             update: {
-                refreshTokens: {
+                data: {
                     push: {
-                        token: refreshToken,
-                        expires: refreshTokenExpires,
+                        fcmToken: fcmToken,
+                        refreshToken: {
+                            token: refreshToken,
+                            expires: refreshTokenExpires,
+                        },
                     },
                 },
             },
             create: {
                 userId: userId,
-                refreshTokens: {
-                    set: [
-                        {
-                            token: refreshToken,
-                            expires: refreshTokenExpires,
-                        },
-                    ],
+                data: {
+                    fcmToken: fcmToken,
+                    refreshToken: {
+                        token: refreshToken,
+                        expires: refreshTokenExpires,
+                    },
                 },
             },
         });
     }
 
     async removeLoginSession(userId: string, refreshToken: string) {
-        const { refreshTokens } =
-            await this.mongoService.loginSession.findUnique({
-                where: {
-                    userId: userId,
+        const { data } = await this.mongoService.loginSession.findUnique({
+            where: {
+                userId: userId,
+            },
+            select: {
+                data: {
+                    select: {
+                        refreshToken: true,
+                        fcmToken: true,
+                    },
                 },
-                select: {
-                    refreshTokens: true,
-                },
-            });
+            },
+        });
         const verifyToken = async (token: string) => {
             return token ? await verify(token, refreshToken) : false;
         };
-        const result = [];
-        for (const token of refreshTokens) {
+
+        const loginResult: LoginData[] = [];
+        for (const login of data) {
             if (
-                (await verifyToken(token.token)) ||
-                token.expires < new Date()
+                (await verifyToken(login.refreshToken.token)) ||
+                login.refreshToken.expires < new Date()
             ) {
                 continue;
             }
-            result.push(token);
+            loginResult.push(login);
         }
-        if (result.length === 0) {
-            result.push({
-                token: '',
-                expires: new Date(),
-            });
-        }
-        return await this.mongoService.loginSession.update({
+        return await this.mongoService.loginSession.updateMany({
             where: {
                 userId: userId,
             },
             data: {
-                refreshTokens: {
-                    set: result,
+                data: {
+                    set: loginResult,
                 },
             },
         });
