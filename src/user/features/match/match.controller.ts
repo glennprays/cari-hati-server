@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards, Request, Get, Delete, Body } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserGetAllMatchDTO, UserRequestMatchDTO, UserUnmatchMatchDTO } from 'src/user/dtos/user.dto';
+import { UserGetAllMatchDTO, UserRequestMatchDTO, UserUnmatchMatchDTO, UserUpdateStatusMatchDTO } from 'src/user/dtos/user.dto';
 import { MatchService } from './match.service';
 
 @Controller('')
@@ -43,6 +43,19 @@ export class MatchController {
         return this.matchService.unmatchWithUser(
             req.user.sub.id,
             userUnmatchtMatchDTO.receiverId,
+            );
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('status')
+    async updateMatch(
+        @Body() userUpdateStatusMatchDTO: UserUpdateStatusMatchDTO,
+        @Request() req,
+        ) {
+        return this.matchService.updateMatchStatus(
+            req.user.sub.id,
+            userUpdateStatusMatchDTO.id,
+            userUpdateStatusMatchDTO.state,
             );
     }
 }

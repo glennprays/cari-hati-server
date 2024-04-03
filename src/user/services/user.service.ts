@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { User } from '../models/user.model';
-import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
+import { Gender } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
@@ -193,8 +193,6 @@ export class UserService {
         return updateUser;
     }
 
-   
-
     async updateUserPhotoProfile(userId: string, image: Express.Multer.File) {
         const filename = `${randomUUID()}.jpg`;
 
@@ -240,21 +238,5 @@ export class UserService {
         } catch (error) {
             throw new BadRequestException(error);
         }
-    }
-
-    async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
-        let whereClause: any = {
-            OR: [{ senderId: userId }, { receiverId: userId }],
-        };
-
-        if (accepted_only) {
-            whereClause.status = MatchStatus.accepted;
-        }
-        
-        const userMatches = await this.mongoService.userMatch.findMany({
-            where: whereClause,
-        });
-
-        return userMatches;
     }
 }

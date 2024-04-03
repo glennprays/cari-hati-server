@@ -13,6 +13,7 @@ import { RouterModule } from '@nestjs/core';
     providers: [PersonService, UserService],
     exports: [PersonService, UserService],
     imports: [
+        MatchModule,
         PhotoGalleryModule,
         BlockModule,
         DatabaseModule,
