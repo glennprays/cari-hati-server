@@ -21,6 +21,7 @@ import {
     UserUpdateDTO,
 } from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 
 @Controller('users')
 export class UserController {
@@ -89,29 +90,33 @@ export class UserController {
         );
     }
 
-       @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard)
     @Get('matches')
     async getUserMatch(
         @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
-        @Request() req
-        ) {
+        @Request() req,
+    ) {
         return this.userService.findAllMatchesByUserId(
             req.user.sub.id,
             userGetAllMatchDTO.accepted_only,
-            );
+        );
     }
-    
+
     @UseGuards(JwtGuard)
     @Delete('matches')
     async unmatchWithUser(
         @Body() userUnmatchtMatchDTO: UserUnmatchMatchDTO,
         @Request() req,
-        ) {
+    ) {
         return this.userService.unmatchWithUser(
             req.user.sub.id,
             userUnmatchtMatchDTO.receiverId,
-            );
+        );
     }
 
-
+    // DEBUG: this just for testing firebase messaging
+    @Post('notification')
+    async sendNotificationToUser(@Body() message: Message) {
+        return await this.userService.sendNotificationToUser(message);
+    }
 }
