@@ -7,7 +7,7 @@ import {
 import { PersonService } from 'src/user/services/person.service';
 import { verify } from 'argon2';
 import { JwtService } from '@nestjs/jwt';
-import { PersonRegisterDTO, PersonResponseDTO } from 'src/user/dtos/person.dto';
+import { PersonDTO, PersonResponseDTO } from 'src/user/dtos/person.dto';
 import { PersonTokenPayload } from './models/payload.model';
 import { MailService } from 'src/common/mail/mail.service';
 import { RedisService } from 'src/common/database/redis/redis.service';
@@ -59,7 +59,11 @@ export class AuthService {
         };
     }
 
-    async signIn(person: PersonResponseDTO, @Res({ passthrough: true }) res) {
+    async signIn(
+        person: PersonResponseDTO,
+        fcmToken: string,
+        @Res({ passthrough: true }) res,
+    ) {
         const { refresh_token, access_token } =
             await this.generateTokens(person);
         const tokenExpires = new Date(
@@ -69,6 +73,7 @@ export class AuthService {
             person.id,
             refresh_token,
             tokenExpires,
+            fcmToken,
         );
         res.cookie('refresh_token', refresh_token, {
             expires: tokenExpires,
@@ -81,7 +86,7 @@ export class AuthService {
     }
 
     async register(
-        { email, password }: PersonRegisterDTO,
+        { email, password, fcmToken }: PersonDTO,
         @Res({ passthrough: true }) res,
     ) {
         try {
@@ -106,6 +111,7 @@ export class AuthService {
                 person.id,
                 refresh_token,
                 tokenExpires,
+                fcmToken,
             );
             res.cookie('refresh_token', refresh_token, {
                 expires: tokenExpires,
