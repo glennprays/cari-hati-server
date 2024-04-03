@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MatchStatus } from 'prisma/mongo/generated/client';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
+import { UserMatch } from './models/match.model';
+import { UserUpdateStatusMatchDTO } from 'src/user/dtos/user.dto';
 
 @Injectable()
 export class MatchService {
@@ -88,4 +90,22 @@ export class MatchService {
             throw new BadRequestException(error.message);
         }
     }
+
+    async updateMatchStatus(userId: string, idMatch: string, state: MatchStatus): Promise<UserMatch | null> {
+        try {    
+          const updateData: Partial<UserMatch> = { status: state };
+    
+          const updateUserMatch = await this.mongoService.userMatch.update({
+            where: { id: idMatch, senderId: userId, status: "pending"},
+            data: updateData,
+          });
+    
+          return updateUserMatch;
+        } catch (error) {
+            throw new BadRequestException("update state failed");
+        }
+      }
+      
+    
+    
 }
