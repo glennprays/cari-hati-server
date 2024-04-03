@@ -12,6 +12,8 @@ import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
 import { randomUUID } from 'node:crypto';
 import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
+import { FcmService } from 'src/common/firebase/fcm/fcm.service';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 
 @Injectable()
 export class UserService {
@@ -19,6 +21,7 @@ export class UserService {
         private mongoService: MongoService,
         private personService: PersonService,
         private s3Service: S3Service,
+        private fcmSevice: FcmService,
     ) {}
 
     async findOneById(id: string) {
@@ -282,7 +285,7 @@ export class UserService {
     }
 
     async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
-        let whereClause: any = {
+        const whereClause: any = {
             OR: [{ senderId: userId }, { receiverId: userId }],
         };
 
@@ -322,6 +325,19 @@ export class UserService {
             return { message: 'Unmatched successfully' };
         } catch (error) {
             throw new BadRequestException(error.message);
+        }
+    }
+
+    // DEBUG: this just for testing firebase messaging
+    async sendNotificationToUser(message: Message) {
+        try {
+            const parts = (await this.fcmSevice.sendMessage(message)).split(
+                '/',
+            );
+            const notificationId = parts[parts.length - 1];
+            return notificationId;
+        } catch (error) {
+            throw new BadRequestException(error);
         }
     }
 }

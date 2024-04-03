@@ -33,6 +33,5 @@ export class UserUnmatchMatchDTO {
 }
 
 export class UserGetAllMatchDTO {
-    accepted_only : boolean;
+    accepted_only: boolean;
 }
-
