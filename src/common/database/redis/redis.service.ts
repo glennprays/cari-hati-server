@@ -4,7 +4,7 @@ import { RedisKeyFactory } from './factory/key.factory';
 
 @Injectable()
 export class RedisService {
-    constructor(@Inject('REDIS_CLIENT') private redisClient: Redis) {}
+    constructor(@Inject('REDIS_CLIENT') public redisClient: Redis) {}
 
     async setVerificationCode(email: string, code: number) {
         const key = RedisKeyFactory.createVerificationCodeKey(email);
