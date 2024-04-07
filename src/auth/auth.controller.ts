@@ -63,6 +63,14 @@ export class AuthController {
         );
     }
 
+    @UseGuards(JwtGuard)
+    @Post('account/activate/code')
+    async resendVerificationCode(@Request() req) {
+        const email = req.user.username;
+        return await this.authService.resendVerificationCode(email);
+    }
+
+
     @Post('register')
     async register(
         @Body() registerPersonDTO: PersonDTO,
