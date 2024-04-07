@@ -25,3 +25,9 @@ export class CoinTransaction implements CoinTransactionModel {
     updatedAt: Date;
     transactionTypeId: number;
 }
+
+export class CoinPackage implements CoinPackage {
+    id: number;
+    coinAmount: bigint;
+    price: number;
+}
