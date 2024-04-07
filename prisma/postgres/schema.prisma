@@ -1,6 +1,6 @@
 generator client {
     provider = "prisma-client-js"
-    output = "./generated/client"
+    output   = "./generated/client"
 }
 
 datasource db {
@@ -12,8 +12,8 @@ model CoinTransaction {
     id                  String                @id(map: "PK_d0d1b4baa1f1b56f36fd3b2ee58") @default(uuid()) @map("transaction_id") @db.Uuid
     userAccountId       String                @map("user_account_id") @db.Uuid
     coinAmount          BigInt
-    moneyAmount         Int                   @map("money_amount")
-    transactionFee      Int                   @map("transaction_fee")
+    moneyAmount         Float                 @map("money_amount")
+    transactionFee      Float                 @map("transaction_fee")
     status              CoinTransactionStatus @default(waiting)
     bankAccountNumber   BigInt                @map("bank_account_number")
     createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
@@ -28,7 +28,7 @@ model CoinTransaction {
 model CoinTransactionType {
     id               Int               @id(map: "PK_61a406073b311170189d25736bb") @default(autoincrement()) @map("transaction_type_id")
     name             String            @unique(map: "UQ_7e1cd3574a559cb6fac13196dab") @db.VarChar
-    feePercentage    Int               @map("fee_percentage")
+    feePercentage    Float             @map("fee_percentage")
     createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
     coinTransactions CoinTransaction[] @relation("CoinTransaction")
 
@@ -66,7 +66,7 @@ model Person {
     role                    PersonRole        @default(user)
     password                String            @db.VarChar
     createdAt               DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-    activatedAt             DateTime?          @map("activated_at") @db.Timestamp(6)
+    activatedAt             DateTime?         @map("activated_at") @db.Timestamp(6)
     updatedAt               DateTime          @default(now()) @map("updated_at") @db.Timestamp(6)
     coinTransactions        CoinTransaction[] @relation("UserCoinTransaction")
     giftTransactionsSender  GiftTransaction[] @relation("GiftSender")

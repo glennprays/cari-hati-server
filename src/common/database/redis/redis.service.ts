@@ -7,7 +7,7 @@ export class RedisService {
     constructor(@Inject('REDIS_CLIENT') public redisClient: Redis) {}
 
     async setVerificationCode(email: string, code: number) {
-        const key = RedisKeyFactory.createVerificationCodeKey(email);
+        const key = RedisKeyFactory.verificationCodeKey(email);
         const keyExists = await this.redisClient.exists(key);
         if (keyExists) {
             throw new BadRequestException('Verification code already sent');
@@ -17,7 +17,7 @@ export class RedisService {
     }
 
     async verifyVerificationCode(email: string, code: number) {
-        const key = RedisKeyFactory.createVerificationCodeKey(email);
+        const key = RedisKeyFactory.verificationCodeKey(email);
         const verificationCode = await this.redisClient.get(key);
         if (parseInt(verificationCode) !== code) {
             throw new BadRequestException('Invalid verification code');

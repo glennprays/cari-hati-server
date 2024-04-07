@@ -1,6 +1,19 @@
-import { Controller, Post, UseGuards, Request, Get, Delete, Body } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    UseGuards,
+    Request,
+    Get,
+    Delete,
+    Body,
+} from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserGetAllMatchDTO, UserRequestMatchDTO, UserUnmatchMatchDTO, UserUpdateStatusMatchDTO } from 'src/user/dtos/user.dto';
+import {
+    UserGetAllMatchDTO,
+    UserRequestMatchDTO,
+    UserUnmatchMatchDTO,
+    UserUpdateStatusMatchDTO,
+} from 'src/user/dtos/user.dto';
 import { MatchService } from './match.service';
 
 @Controller('')
@@ -20,30 +33,30 @@ export class MatchController {
         );
     }
 
-    @UseGuards(JwtGuard)    
+    @UseGuards(JwtGuard)
     @Get('')
     async getUserMatch(
         @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
-        @Request() req
-        ) {
-            console.log("masuk");
+        @Request() req,
+    ) {
+        console.log('masuk');
 
         return this.matchService.findAllMatchesByUserId(
             req.user.sub.id,
             userGetAllMatchDTO.accepted_only,
-            );
+        );
     }
-    
+
     @UseGuards(JwtGuard)
     @Delete('')
     async unmatchWithUser(
         @Body() userUnmatchtMatchDTO: UserUnmatchMatchDTO,
         @Request() req,
-        ) {
+    ) {
         return this.matchService.unmatchWithUser(
             req.user.sub.id,
             userUnmatchtMatchDTO.receiverId,
-            );
+        );
     }
 
     @UseGuards(JwtGuard)
@@ -51,11 +64,11 @@ export class MatchController {
     async updateMatch(
         @Body() userUpdateStatusMatchDTO: UserUpdateStatusMatchDTO,
         @Request() req,
-        ) {
+    ) {
         return this.matchService.updateMatchStatus(
             req.user.sub.id,
             userUpdateStatusMatchDTO.id,
             userUpdateStatusMatchDTO.state,
-            );
+        );
     }
 }

@@ -1,5 +1,4 @@
 import {
-    Catch,
     Logger,
     UnauthorizedException,
     UseFilters,
@@ -20,7 +19,7 @@ import { WsJwtGuard } from 'src/auth/guards/jwt-auth-ws.guard';
 import { RoomService } from './room.service';
 import { WebsocketExceptionsFilter } from 'src/auth/filters/ws.exception';
 import { MessageService } from './message.service.ts';
-import { RedisKeyFactory } from 'src/common/database/redis/factory/key.factory';
+import { Message } from '../models/message.interface';
 
 @WebSocketGateway()
 @UseGuards(WsJwtGuard)
@@ -37,18 +36,34 @@ export class ChatGateway
         private readonly messageService: MessageService,
     ) {}
 
-    afterInit(@ConnectedSocket() client: Socket) {
+    afterInit() {
         this.logger.log('Socket.io Gateway initialized');
     }
 
-    async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
+    handleConnection(@ConnectedSocket() client: Socket) {
         this.logger.log(`Client connected: ${client.id}`);
     }
 
-    async handleDisconnect(@ConnectedSocket() client: Socket) {
-        await this.roomService.removeUser(client.id);
-
-        this.logger.log(`Client disconnected: ${client.id}`);
+    async handleDisconnect(@ConnectedSocket() client: Socket): Promise<void> {
+        try {
+            const rooms = await this.roomService.removeUserFromAllRooms(
+                client.id,
+            );
+            const user = (client.handshake as any).user;
+            for (const room of rooms) {
+                const users = await this.roomService.getUsersInRoom(room);
+                this.server.to(room).emit('left', {
+                    message: 'User left',
+                    user: user.username,
+                    users,
+                });
+            }
+            this.logger.log(`Client disconnected: ${client.id}`);
+        } catch (error) {
+            this.logger.error(
+                `Error removing user ${client.id} from all connections: ${error.message}`,
+            );
+        }
     }
 
     @SubscribeMessage('join')
@@ -57,20 +72,24 @@ export class ChatGateway
         @MessageBody() data: { room: string },
     ) {
         if (data.room) {
-            const user = (client.handshake as any).user;
-            await this.roomService.createRoom(data.room);
-            await this.roomService.addUserToRoom(
-                data.room,
-                user.username,
-                client.id,
-            );
-            client.join(data.room);
-            const users = await this.roomService.getUsersInRoom(data.room);
-            this.server.to(data.room).emit('joined', {
-                message: 'User joined',
-                user: user.username,
-                users,
-            });
+            try {
+                const user = (client.handshake as any).user;
+                await this.roomService.createRoom(data.room, user.sub.id);
+                await this.roomService.addUserToRoom(
+                    data.room,
+                    user.sub.id,
+                    client.id,
+                );
+                client.join(data.room);
+                const users = await this.roomService.getUsersInRoom(data.room);
+                this.server.to(data.room).emit('joined', {
+                    message: 'User joined',
+                    user: user.username,
+                    users,
+                });
+            } catch (error) {
+                this.server.to(client.id).emit('error', error.message);
+            }
         }
     }
 
@@ -80,14 +99,21 @@ export class ChatGateway
         @MessageBody() data: { room: string; message: string },
     ) {
         if (data.room) {
-            const user = (client.handshake as any).user;
-            await this.messageService.addMessage(
+            const isClientInRoom = await this.roomService.isClientInRoom(
                 data.room,
-                data.message,
-                user.username,
+                client.id,
+            );
+            if (!isClientInRoom) {
+                throw new UnauthorizedException('User not in room');
+            }
+            const user = (client.handshake as any).user;
+            const message = await this.messageService.addMessage(
+                data.room,
+                { text: data.message } as Message,
+                user.sub.id,
             );
             this.server.to(data.room).emit('message', {
-                message: data.message,
+                message,
                 user: user.username,
             });
         }

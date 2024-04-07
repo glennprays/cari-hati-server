@@ -1,17 +1,21 @@
 export class RedisKeyFactory {
-    static createVerificationCodeKey(email: string) {
+    static verificationCodeKey(email: string) {
         return `verification_code_${email}`;
     }
 
-    static createChatRoomKey(roomId: string) {
+    static chatRoomKey(roomId: string) {
         return `Room:${roomId}`;
     }
 
-    static createWsUserKey(clientId: string) {
+    static wsUserKey(clientId: string) {
         return `WSUser:${clientId}`;
     }
 
-    static createChatMessageKey(roomId: string) {
+    static chatMessageKey(roomId: string) {
         return `Message:${roomId}`;
+    }
+
+    static decodeChatRoomKey(key: string) {
+        return key.replace('Room:', '');
     }
 }

@@ -119,5 +119,15 @@
         "education",
         "training",
         "design"
+    ],
+    "coinTransactionTypes": [
+        {
+            "name": "topup",
+            "feePercentage": 3
+        },
+        {
+            "name": "withdraw",
+            "feePercentage": 3
+        }
     ]
 }
