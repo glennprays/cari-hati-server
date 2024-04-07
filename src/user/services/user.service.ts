@@ -33,34 +33,38 @@ export class UserService {
     }
 
     async findRefreshToken(userId: string, refreshToken: string) {
-        const loginData = await this.mongoService.loginSession.findFirst({
-            where: {
-                userId: userId,
-            },
-            select: {
-                data: {
-                    select: {
-                        refreshToken: true,
+        try {
+            const loginData = await this.mongoService.loginSession.findFirst({
+                where: {
+                    userId: userId,
+                },
+                select: {
+                    data: {
+                        select: {
+                            refreshToken: true,
+                        },
                     },
                 },
-            },
-        });
+            });
 
-        const refreshTokens = loginData.data.map((val) => val.refreshToken);
+            const refreshTokens = loginData.data.map((val) => val.refreshToken);
 
-        let token = null;
-        for (const data of refreshTokens) {
-            if (
-                (await verify(data.token, refreshToken)) &&
-                data.expires > new Date()
-            ) {
-                token = data;
+            let token = null;
+            for (const data of refreshTokens) {
+                if (
+                    (await verify(data.token, refreshToken)) &&
+                    data.expires > new Date()
+                ) {
+                    token = data;
+                }
             }
-        }
-        if (!token) {
+            if (!token) {
+                throw new UnauthorizedException();
+            }
+            return token;
+        } catch (error) {
             throw new UnauthorizedException();
         }
-        return token;
     }
 
     async addLoginSession(
