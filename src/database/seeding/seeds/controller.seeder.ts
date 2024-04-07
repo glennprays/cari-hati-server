@@ -21,7 +21,7 @@ async function main() {
             await dummySeeder(mongo, postgres);
             break;
         case 'structural':
-            await structuralSeeder(mongo);
+            await structuralSeeder(mongo, postgres);
             break;
         default:
             throw new Error('Failed! Invalid mode');

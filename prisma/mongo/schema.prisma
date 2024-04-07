@@ -125,21 +125,13 @@ enum MatchStatus {
 }
 
 model UserMatch {
-    id           String        @id @default(auto()) @map("_id") @db.ObjectId
-    senderId     String
-    receiverId   String
-    liked        Boolean
-    status       MatchStatus
-    updatedAt    DateTime      @default(now())
-    createdAt    DateTime      @default(now())
-    sender       User          @relation("MatchSender", fields: [senderId], references: [id])
-    receiver     User          @relation("MatchReceiver", fields: [receiverId], references: [id])
-    conversation Conversation?
-}
-
-model Conversation {
-    id        String    @id @default(auto()) @map("_id") @db.ObjectId
-    matchId   String    @unique @db.ObjectId
-    match     UserMatch @relation(fields: [matchId], references: [id])
-    createdAt DateTime  @default(now())
+    id         String      @id @map("_id")
+    senderId   String
+    receiverId String
+    liked      Boolean
+    status     MatchStatus
+    updatedAt  DateTime    @default(now())
+    createdAt  DateTime    @default(now())
+    sender     User        @relation("MatchSender", fields: [senderId], references: [id])
+    receiver   User        @relation("MatchReceiver", fields: [receiverId], references: [id])
 }

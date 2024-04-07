@@ -15,10 +15,10 @@ export class MatchService {
         if (senderId == receiverId) {
             throw new BadRequestException('');
         }
+        const matchId = `${senderId}-${receiverId}`;
         const userMatch = await this.mongoService.userMatch.findFirst({
             where: {
-                senderId: senderId,
-                receiverId: receiverId,
+                id: matchId,
                 status: {
                     not: MatchStatus.ignored,
                 },
@@ -30,6 +30,7 @@ export class MatchService {
         }
         return await this.mongoService.userMatch.create({
             data: {
+                id: matchId,
                 sender: {
                     connect: {
                         id: senderId,
@@ -47,7 +48,7 @@ export class MatchService {
     }
 
     async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
-        let whereClause: any = {
+        const whereClause: any = {
             OR: [{ senderId: userId }, { receiverId: userId }],
         };
 
@@ -90,21 +91,37 @@ export class MatchService {
         }
     }
 
-    async updateMatchStatus(userId: string, idMatch: string, state: MatchStatus): Promise<UserMatch | null> {
-        try {    
-          const updateData: Partial<UserMatch> = { status: state };
-    
-          const updateUserMatch = await this.mongoService.userMatch.update({
-            where: { id: idMatch, senderId: userId, status: "pending"},
-            data: updateData,
-          });
-    
-          return updateUserMatch;
+    async updateMatchStatus(
+        userId: string,
+        idMatch: string,
+        state: MatchStatus,
+    ): Promise<UserMatch | null> {
+        try {
+            const updateData: Partial<UserMatch> = { status: state };
+
+            const updateUserMatch = await this.mongoService.userMatch.update({
+                where: { id: idMatch, senderId: userId, status: 'pending' },
+                data: updateData,
+            });
+
+            return updateUserMatch;
         } catch (error) {
-            throw new BadRequestException("update state failed");
+            throw new BadRequestException('update state failed');
         }
-      }
-      
-    
-    
+    }
+
+    async checkAcceptedkUserMatch(matchId: string, userId: string) {
+        const userMatch = await this.mongoService.userMatch.findFirst({
+            where: {
+                id: matchId,
+                status: MatchStatus.accepted,
+                OR: [{ senderId: userId }, { receiverId: userId }],
+            },
+        });
+
+        if (!userMatch) {
+            throw new Error('User not authorized');
+        }
+        return userMatch;
+    }
 }
