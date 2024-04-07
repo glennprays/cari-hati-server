@@ -49,12 +49,13 @@ export async function dummySeeder(
             gender: 'male',
             birth: '1951-08-17T00:00:00Z',
             description: 'Handsome and hard worker man',
+            matchClass: 'C',
             passions: [
+                { name: 'reading' },
+                { name: 'writing' },
+                { name: 'cooking' },
+                { name: 'gardening' },
                 { name: 'hiking' },
-                { name: 'camping' },
-                { name: 'biking' },
-                { name: 'running' },
-                { name: 'woodworking' },
             ],
             userGallery: {
                 create: {
@@ -75,12 +76,13 @@ export async function dummySeeder(
             gender: 'female',
             birth: '1951-08-17T00:00:00Z',
             description: 'Humble and kind',
+            matchClass: 'C',
             passions: [
-                { name: 'cooking' },
-                { name: 'sewing' },
-                { name: 'knitting' },
-                { name: 'gardening' },
-                { name: 'painting' },
+                { name: 'reading' },
+                { name: 'learning' },
+                { name: 'writing' },
+                { name: 'photography' },
+                { name: 'volunteering' },
             ],
             userGallery: {
                 create: {

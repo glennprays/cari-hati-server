@@ -16,6 +16,7 @@ model User {
     birth         DateTime?         @db.Date
     description   String?
     coinAmount    Int               @default(0)
+    matchClass    MatchClass?       @map("match_class")
     passions      UserPassion[]
     createdAt     DateTime?         @default(now())
     updatedAt     DateTime?         @default(now())
@@ -27,6 +28,14 @@ model User {
     sender        UserMatch[]       @relation("MatchSender")
     receiver      UserMatch[]       @relation("MatchReceiver")
     LoginSession  LoginSession?
+}
+
+enum MatchClass {
+    A
+    B
+    C
+    D
+    E
 }
 
 model LoginSession {
