@@ -166,6 +166,22 @@ export class AuthService {
         }
     }
 
+    async resendVerificationCode(email: string) {
+        const person = await this.personService.findOneByEmail(email);
+        if (!person) {
+            throw new NotAcceptableException('Account does not exist');
+        } else if (person.activatedAt) {
+            throw new NotAcceptableException('Account is already activated');
+        }
+        const verificationCode = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+        const status = await this.redisService.setVerificationCode(email, verificationCode);
+        if (status) {
+            this.mailService.sendAccountVerification(email, verificationCode);
+            return { message: 'New verification code sent' };
+        }
+    }
+
+
     async updateAccount({
         personId,
         email,
