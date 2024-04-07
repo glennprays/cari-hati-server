@@ -6,6 +6,7 @@ import {
     Get,
     Delete,
     Body,
+    Query,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
@@ -15,6 +16,7 @@ import {
     UserUpdateStatusMatchDTO,
 } from 'src/user/dtos/user.dto';
 import { MatchService } from './match.service';
+import { Passion } from 'prisma/mongo/generated/client';
 
 @Controller('')
 export class MatchController {
@@ -70,5 +72,22 @@ export class MatchController {
             userUpdateStatusMatchDTO.id,
             userUpdateStatusMatchDTO.state,
         );
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('recommendations')
+    async getRecommendations(@Request() req, @Query() query: any) {
+        return await this.matchService.getUserMatchRecommendation(
+            req.user.sub.id,
+            +query.limit,
+            +query.offset,
+        );
+    }
+
+    // DEBUG: this is for testing the match classifier
+    @UseGuards(JwtGuard)
+    @Post('classifier')
+    async classifyMatch(@Body() data: { passions: Passion[] }) {
+        return await this.matchService.calculateUserMatchClass(data.passions);
     }
 }
