@@ -38,7 +38,6 @@ export class UserGetAllMatchDTO {
 }
 
 export class UserUpdateStatusMatchDTO {
-    id : string;
-    state : MatchStatus;
+    id: string;
+    state: MatchStatus;
 }
-
