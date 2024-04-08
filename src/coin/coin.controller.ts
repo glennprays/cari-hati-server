@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { CoinService } from './services/coin.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { SimulatePaymentDTO, TopupRequestDTO } from './dtos/payment.dto';
