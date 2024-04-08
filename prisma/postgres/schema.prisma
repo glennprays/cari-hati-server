@@ -9,15 +9,19 @@ datasource db {
 }
 
 model CoinTransaction {
-    id                  String                @id(map: "PK_d0d1b4baa1f1b56f36fd3b2ee58") @default(uuid()) @map("transaction_id") @db.Uuid
+    id                  String                @id(map: "PK_d0d1b4baa1f1b56f36fd3b2ee58") @map("transaction_id")
     userAccountId       String                @map("user_account_id") @db.Uuid
-    coinAmount          BigInt
+    coinAmount          Int                   @map("coin_amount")
     moneyAmount         Float                 @map("money_amount")
     transactionFee      Float                 @map("transaction_fee")
     status              CoinTransactionStatus @default(waiting)
-    bankAccountNumber   BigInt                @map("bank_account_number")
+    bankCode            String                @map("bank_code")
+    bankAccountNumber   String                @unique @map("bank_account_number")
+    expiresAt           DateTime              @map("expires_at") @db.Timestamp(6)
     createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
     updatedAt           DateTime              @default(now()) @map("updated_at") @db.Timestamp(6)
+    webhookId           String?               @map("webhook_id")
+    webhookCreated      String?               @map("webhook_created")
     transactionTypeId   Int                   @map("transaction_type_id")
     coinTransactionType CoinTransactionType?  @relation("CoinTransaction", fields: [transactionTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d30f9e6ed44d145c755774e285d")
     user                Person                @relation("UserCoinTransaction", fields: [userAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)

@@ -70,7 +70,6 @@ export class AuthController {
         return await this.authService.resendVerificationCode(email);
     }
 
-
     @Post('register')
     async register(
         @Body() registerPersonDTO: PersonDTO,
