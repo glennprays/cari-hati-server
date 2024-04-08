@@ -8,6 +8,7 @@ import { XenditService } from 'src/common/xendit/xendit.service';
 import { UserService } from 'src/user/services/user.service';
 import { SimulatePaymentDTO, TopupRequestDTO } from '../dtos/payment.dto';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CoinService {
@@ -102,6 +103,35 @@ export class CoinService {
             console.log(error);
             throw new BadRequestException(error.message);
         }
+    }
+
+    @Cron('* * * * *')
+    async updateExpiredTransactions() {
+        const expiredTransactions =
+            await this.postgresService.coinTransaction.findMany({
+                where: {
+                    status: 'waiting',
+                    expiresAt: {
+                        lte: new Date(),
+                    },
+                },
+            });
+        await this.postgresService.coinTransaction.updateMany({
+            where: {
+                id: {
+                    in: expiredTransactions.map(
+                        (transaction) => transaction.id,
+                    ),
+                },
+            },
+            data: {
+                status: 'failed',
+            },
+        });
+        console.log(
+            'Cron job: Update expired transaction:',
+            expiredTransactions.length,
+        );
     }
 
     async simulateTransaction(
