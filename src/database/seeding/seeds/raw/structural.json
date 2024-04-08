@@ -35,5 +35,39 @@
             "name": "withdraw",
             "feePercentage": 3
         }
+    ],
+    "coinPackage": [
+        {
+            "coinAmount": 50,
+            "price": 20000
+        },
+        {
+            "coinAmount": 100,
+            "price": 40000  
+        },
+        {
+            "coinAmount": 200,
+            "price": 78000
+        },
+        {
+            "coinAmount": 500,
+            "price": 196000
+        },
+        {
+            "coinAmount": 1000,
+            "price": 382500
+        },
+        {
+            "coinAmount": 2000,
+            "price": 763000
+        },
+        {
+            "coinAmount": 5000,
+            "price": 1523000
+        },
+        {
+            "coinAmount": 10000,
+            "price": 3030000
+        }
     ]
 }
