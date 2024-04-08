@@ -1,4 +1,4 @@
-import { MatchStatus } from 'prisma/mongo/generated/client';
+import { Blocked, MatchStatus } from 'prisma/mongo/generated/client';
 import { Gender } from '../models/user.model';
 import { UserPhotoProfile } from '../models/user.model';
 import { UserPassion } from '../models/user.model';
@@ -41,3 +41,9 @@ export class UserUpdateStatusMatchDTO {
     id: string;
     state: MatchStatus;
 }
+
+export class UserBlockDTO {
+    target_id: string;
+    ceatedAt: Date;
+}
+

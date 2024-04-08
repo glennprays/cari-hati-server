@@ -9,6 +9,7 @@ import { UserService } from 'src/user/services/user.service';
 import { SimulatePaymentDTO, TopupRequestDTO } from '../dtos/payment.dto';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
 
+
 @Injectable()
 export class CoinService {
     constructor(

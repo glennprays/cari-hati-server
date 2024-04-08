@@ -272,4 +272,31 @@ export class UserService {
             throw new BadRequestException(error);
         }
     }
+
+    async blockUser(userId: string, targetId: string): Promise<string | null> {
+        try {
+            const existingBlockedUser =
+                await this.mongoService.blocked.findFirst({
+                    where: {
+                        blockerId: userId,
+                        blockedId: targetId,
+                    },
+                });
+
+            if (existingBlockedUser) {
+                throw new BadRequestException('User already blocked');
+            }
+
+            await this.mongoService.blocked.create({
+                data: {
+                    blockerId: userId,
+                    blockedId: targetId,
+                    createdAt: new Date(),
+                },
+            });
+            return 'User blocked successfully';
+        } catch (error) {
+            throw new BadRequestException("Block Not Successfuly");
+        }
+    }
 }
