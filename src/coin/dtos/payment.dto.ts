@@ -11,3 +11,16 @@ export class TopupRequestDTO {
     @Expose({ name: 'bank_code' })
     bankCode: BankCode;
 }
+
+export class SimulatePaymentDTO {
+    @Expose({ name: 'money_amount' })
+    @IsNumber()
+    @IsPositive()
+    moneyAmount: number;
+
+    @Expose({ name: 'bank_code' })
+    bankCode: BankCode;
+
+    @Expose({ name: 'bank_account_number' })
+    bankAccountNumber: string;
+}

@@ -173,14 +173,17 @@ export class AuthService {
         } else if (person.activatedAt) {
             throw new NotAcceptableException('Account is already activated');
         }
-        const verificationCode = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
-        const status = await this.redisService.setVerificationCode(email, verificationCode);
+        const verificationCode =
+            Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+        const status = await this.redisService.setVerificationCode(
+            email,
+            verificationCode,
+        );
         if (status) {
             this.mailService.sendAccountVerification(email, verificationCode);
             return { message: 'New verification code sent' };
         }
     }
-
 
     async updateAccount({
         personId,
