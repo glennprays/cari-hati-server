@@ -43,11 +43,16 @@ export async function structuralSeeder(
     }));
     const createManyCoinPackages = coinPackages.map((coinPackage) =>
         postgres.coinPackage.upsert({
-            where: { id: coinPackage.coinAmount.toString() },
+            where: { 
+                coinAmount_price: {
+                    coinAmount: coinPackage.coinAmount,
+                    price: coinPackage.price
+                }
+            },
             update: {},
             create: coinPackage,
-
         }),
     );
+    
     await Promise.all(createManyCoinPackages);
 }

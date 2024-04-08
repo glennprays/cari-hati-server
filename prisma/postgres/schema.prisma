@@ -41,8 +41,8 @@ model CoinPackage {
   price       Float
   
   @@map("coin_package")
+  @@unique([coinAmount, price])
 }
-
 
 model GiftItem {
     id               String            @id(map: "PK_a3b4eab5e05d492765890d29064") @default(uuid()) @map("gift_item_id") @db.Uuid
