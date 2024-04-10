@@ -11,7 +11,6 @@ import { CoinModule } from './coin/coin.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
 import { DataModule } from './data/data.module';
-import { PassionService } from './user/service/passion.service';
 
 @Module({
     imports: [
@@ -28,6 +27,6 @@ import { PassionService } from './user/service/passion.service';
         DataModule,
     ],
     controllers: [AppController, AuthController],
-    providers: [AppService, PassionService],
+    providers: [AppService],
 })
 export class AppModule {}
