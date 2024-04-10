@@ -14,6 +14,7 @@ import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 import { FcmService } from 'src/common/firebase/fcm/fcm.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 import { NotificationService } from 'src/notification/services/notification.service';
+import { CoinService } from 'src/coin/services/coin.service';
 
 @Injectable()
 export class UserService {
@@ -283,6 +284,28 @@ export class UserService {
             userId,
             notificationId,
         );
+    }
+
+    async getUnreadNotificationCount(userId: string) {
+        return await this.notificationService.getUnreadNotificationCount(
+            userId,
+        );
+    }
+
+    async getUserCoins(userId: string) {
+        try {
+            const user = await this.mongoService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                select: {
+                    coinAmount: true,
+                },
+            });
+            return user.coinAmount;
+        } catch (error) {
+            throw new BadRequestException('Failed to get user coins');
+        }
     }
 
     // DEBUG: this just for testing firebase messaging

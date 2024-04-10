@@ -95,6 +95,18 @@ export class UserController {
         );
     }
 
+    @UseGuards(JwtGuard)
+    @Get('notifications/unread')
+    async getUnreadNotificationCount(@Request() req) {
+        return this.userService.getUnreadNotificationCount(req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('coins')
+    async getUserCoins(@Request() req) {
+        return this.userService.getUserCoins(req.user.sub.id);
+    }
+
     // DEBUG: this just for testing firebase messaging
     @Post('notification')
     async testNotificationToUser(@Body() message: Message) {

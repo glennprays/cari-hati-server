@@ -111,4 +111,19 @@ export class NotificationService {
             throw new BadRequestException(error.message);
         }
     }
+
+    async getUnreadNotificationCount(userId: string) {
+        try {
+            const notifications = await this.mongoService.notification.findMany(
+                {
+                    where: {
+                        userId: userId,
+                    },
+                },
+            );
+            return notifications.filter((val) => !val.readAt).length;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
 }
