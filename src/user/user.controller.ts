@@ -113,5 +113,11 @@ export class UserController {
             );
     }
 
+    @UseGuards(JwtGuard)
+    @Get('passions')
+    async getPassions(@Request() req) {
+        return this.userService.findOneById(req.user.sub.id);
+    }
+
 
 }
