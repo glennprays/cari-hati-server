@@ -9,6 +9,7 @@ import { UserController } from './user.controller';
 import { S3Module } from 'src/common/s3/s3.module';
 import { RouterModule } from '@nestjs/core';
 import { FirebaseModule } from 'src/common/firebase/firebase.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
     providers: [PersonService, UserService],
@@ -32,6 +33,7 @@ import { FirebaseModule } from 'src/common/firebase/firebase.module';
             },
         ]),
         FirebaseModule,
+        NotificationModule,
     ],
     controllers: [UserController],
 })
