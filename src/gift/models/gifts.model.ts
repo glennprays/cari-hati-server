@@ -12,10 +12,10 @@ export class GiftItem implements GiftItemModel {
 }
 
 export class GiftTransaction implements GiftTransactionModel {
+    coinAmount: number;
     id: string;
     senderAccountId: string;
     receiverAccountId: string;
-    coinAmount: bigint;
     createdAt: Date;
     giftItemId: string;
 }

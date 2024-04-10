@@ -120,6 +120,18 @@ export class UserController {
         return await this.userService.updateUserPassions(req.user.sub.id, data);
     }
 
+    @UseGuards(JwtGuard)
+    @Get('gifts')
+    async getUserGifts(
+        @Request() req,
+        @Query('type') type: 'sent' | 'received',
+    ) {
+        return await this.userService.getUserGiftTransactions(
+            req.user.sub.id,
+            type,
+        );
+    }
+
     // DEBUG: this just for testing firebase messaging
     @Post('notification')
     async testNotificationToUser(@Body() message: Message) {

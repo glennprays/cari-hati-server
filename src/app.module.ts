@@ -26,7 +26,7 @@ import { DataModule } from './data/data.module';
         }),
         DataModule,
     ],
-    controllers: [AppController, AuthController],
+    controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule {}

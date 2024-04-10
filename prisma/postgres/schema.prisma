@@ -63,7 +63,7 @@ model GiftTransaction {
     id                String   @id(map: "PK_e6c3ccf00cb4185681ab6e83ee3") @default(uuid()) @map("gift_transaction_id") @db.Uuid
     senderAccountId   String   @map("sender_account_id") @db.Uuid
     receiverAccountId String   @map("receiver_account_id") @db.Uuid
-    coinAmount        BigInt   @map("coin_amount")
+    coinAmount        Int      @map("coin_amount")
     createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp(6)
     giftItemId        String   @map("gift_item_id") @db.Uuid
     giftItem          GiftItem @relation("GiftTransaction", fields: [giftItemId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_6fb26f046492292cbafe3157c55")
