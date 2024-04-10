@@ -80,4 +80,35 @@ export class NotificationService {
             throw new BadRequestException(error);
         }
     }
+
+    async updateNotificationReadAt(userId: string, notificationId: string) {
+        try {
+            const notification =
+                await this.mongoService.notification.findUnique({
+                    where: {
+                        id: notificationId,
+                        userId: userId,
+                    },
+                    select: {
+                        readAt: true,
+                    },
+                });
+            if (!notification) {
+                throw new BadRequestException('Notification not found');
+            } else if (notification.readAt) {
+                throw new BadRequestException('Notification already read');
+            }
+            return await this.mongoService.notification.update({
+                where: {
+                    id: notificationId,
+                    userId: userId,
+                },
+                data: {
+                    readAt: new Date(),
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
 }

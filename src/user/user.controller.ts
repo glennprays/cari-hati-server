@@ -11,6 +11,7 @@ import {
     Put,
     Delete,
     Query,
+    Param,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
@@ -79,6 +80,18 @@ export class UserController {
             req.user.sub.id,
             +query.limit,
             +query.offset,
+        );
+    }
+
+    @UseGuards(JwtGuard)
+    @Put('notifications/:notificationId')
+    async updateNotificationReadAt(
+        @Request() req,
+        @Param('notificationId') notificationId: string,
+    ) {
+        return this.userService.updateNotificationReadAt(
+            req.user.sub.id,
+            notificationId,
         );
     }
 
