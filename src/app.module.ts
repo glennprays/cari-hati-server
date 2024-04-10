@@ -10,6 +10,8 @@ import { NotificationModule } from './notification/notification.module';
 import { CoinModule } from './coin/coin.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
+import { DataModule } from './data/data.module';
+import { PassionService } from './user/service/passion.service';
 
 @Module({
     imports: [
@@ -23,8 +25,9 @@ import { AuthController } from './auth/auth.controller';
         ConfigModule.forRoot({
             envFilePath: ['.env.local', '.env'],
         }),
+        DataModule,
     ],
     controllers: [AppController, AuthController],
-    providers: [AppService],
+    providers: [AppService, PassionService],
 })
 export class AppModule {}

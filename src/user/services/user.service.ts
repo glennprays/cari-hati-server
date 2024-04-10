@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Injectable,
     UnauthorizedException,
+    Query
 } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { PersonService } from './person.service';
@@ -12,6 +13,8 @@ import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
 import { randomUUID } from 'node:crypto';
 import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
+import { DataService } from 'src/data/data.service';
+
 
 @Injectable()
 export class UserService {
@@ -19,6 +22,7 @@ export class UserService {
         private mongoService: MongoService,
         private personService: PersonService,
         private s3Service: S3Service,
+        private dataService: DataService
     ) {}
 
     async findOneById(id: string) {
@@ -324,4 +328,5 @@ export class UserService {
             throw new BadRequestException(error.message);
         }
     }
+
 }
