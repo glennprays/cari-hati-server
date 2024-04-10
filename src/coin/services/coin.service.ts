@@ -10,6 +10,7 @@ import { SimulatePaymentDTO, TopupRequestDTO } from '../dtos/payment.dto';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Cron } from '@nestjs/schedule';
 import { MailService } from 'src/common/mail/mail.service';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 @Injectable()
 export class CoinService {
@@ -18,6 +19,7 @@ export class CoinService {
         private userService: UserService,
         private postgresService: PostgresService,
         private mailService: MailService,
+        private notificationService: NotificationService,
     ) {}
 
     async topupCoin({ bankCode, coinAmount }: TopupRequestDTO, userId: string) {
@@ -38,7 +40,7 @@ export class CoinService {
 
         const transactionFee = (moneyAmount * topupType.feePercentage) / 100;
 
-        const referenceId = `tu-${new Date().toISOString()}-${randomUUID()}`;
+        const referenceId = `tu-${Date.now()}-${randomUUID()}`;
         const expirationDate = new Date(
             new Date().getTime() + 2 * 60 * 60 * 1000,
         ).toISOString();
@@ -98,6 +100,7 @@ export class CoinService {
                         updatedAt: new Date(),
                     },
                     select: {
+                        id: true,
                         user: {
                             select: {
                                 id: true,
@@ -123,17 +126,23 @@ export class CoinService {
                 virtualAccountNumber: transaction.bankAccountNumber,
                 date: transaction.updatedAt.toISOString(),
             });
-            this.userService.sendNotificationTouUser(transaction.user.id, {
-                notification: {
-                    title: 'Topup Success',
-                    body: `Your topup with amount ${transaction.coinAmount} coins has been success`,
-                },
-                webpush: {
-                    fcmOptions: {
-                        link: '/coins/history',
+            const targetPath = `/transactions/${transaction.id}`;
+            this.notificationService.sendNotificationToUser(
+                transaction.user.id,
+                'transaction',
+                {
+                    notification: {
+                        title: 'Topup Success',
+                        body: `Your topup with amount ${transaction.coinAmount} coins has been success`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
                     },
                 },
-            });
+                targetPath,
+            );
             return transaction;
         } catch (error) {
             console.log(error);
