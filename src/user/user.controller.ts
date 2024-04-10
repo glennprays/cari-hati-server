@@ -10,6 +10,8 @@ import {
     UploadedFile,
     Put,
     Delete,
+    Query,
+    Param,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
@@ -69,6 +71,28 @@ export class UserController {
     @Delete('profile/photo')
     async deleteUserPhotoProfile(@Request() req) {
         return this.userService.deleteUserPhotoProfile(req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('notifications')
+    async getNotifications(@Request() req, @Query() query: any) {
+        return this.userService.getUserNotifications(
+            req.user.sub.id,
+            +query.limit,
+            +query.offset,
+        );
+    }
+
+    @UseGuards(JwtGuard)
+    @Put('notifications/:notificationId')
+    async updateNotificationReadAt(
+        @Request() req,
+        @Param('notificationId') notificationId: string,
+    ) {
+        return this.userService.updateNotificationReadAt(
+            req.user.sub.id,
+            notificationId,
+        );
     }
 
     // DEBUG: this just for testing firebase messaging

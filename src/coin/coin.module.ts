@@ -7,6 +7,7 @@ import { UserModule } from 'src/user/user.module';
 import { DatabaseModule } from 'src/common/database/database.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from 'src/common/mail/mail.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { MailModule } from 'src/common/mail/mail.module';
         DatabaseModule,
         ScheduleModule.forRoot(),
         MailModule,
+        NotificationModule,
     ],
     providers: [XenditService, CoinService],
     controllers: [CoinController],
