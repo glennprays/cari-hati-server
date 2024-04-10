@@ -18,6 +18,7 @@ import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './services/user.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
+import { PassionDTO } from 'src/data/dtos/passion.dto';
 
 @Controller('')
 export class UserController {
@@ -105,6 +106,18 @@ export class UserController {
     @Get('coins')
     async getUserCoins(@Request() req) {
         return this.userService.getUserCoins(req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('passions')
+    async getPassions(@Request() req) {
+        return await this.userService.getUserPassions(req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
+    @Put('passions')
+    async updatePassions(@Request() req, @Body() data: PassionDTO[]) {
+        return await this.userService.updateUserPassions(req.user.sub.id, data);
     }
 
     // DEBUG: this just for testing firebase messaging
