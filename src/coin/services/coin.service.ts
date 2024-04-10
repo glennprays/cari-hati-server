@@ -9,6 +9,7 @@ import { UserService } from 'src/user/services/user.service';
 import { SimulatePaymentDTO, TopupRequestDTO } from '../dtos/payment.dto';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Cron } from '@nestjs/schedule';
+import { MailService } from 'src/common/mail/mail.service';
 
 @Injectable()
 export class CoinService {
@@ -16,6 +17,7 @@ export class CoinService {
         private xenditService: XenditService,
         private userService: UserService,
         private postgresService: PostgresService,
+        private mailService: MailService,
     ) {}
 
     async topupCoin({ bankCode, coinAmount }: TopupRequestDTO, userId: string) {
@@ -93,11 +95,45 @@ export class CoinService {
                         status: 'success',
                         webhookId: webhookId,
                         webhookCreated: response.created,
+                        updatedAt: new Date(),
+                    },
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                email: true,
+                            },
+                        },
+                        moneyAmount: true,
+                        transactionFee: true,
+                        coinAmount: true,
+                        bankAccountNumber: true,
+                        bankCode: true,
+                        updatedAt: true,
                     },
                 });
             if (!transaction) {
                 throw new BadRequestException('Transaction is not valid');
             }
+            this.mailService.sendTransactionSuccess(transaction.user.email, {
+                price: transaction.moneyAmount,
+                transactionFee: transaction.transactionFee,
+                coinAmount: transaction.coinAmount,
+                bank: transaction.bankCode,
+                virtualAccountNumber: transaction.bankAccountNumber,
+                date: transaction.updatedAt.toISOString(),
+            });
+            this.userService.sendNotificationTouUser(transaction.user.id, {
+                notification: {
+                    title: 'Topup Success',
+                    body: `Your topup with amount ${transaction.coinAmount} coins has been success`,
+                },
+                webpush: {
+                    fcmOptions: {
+                        link: '/coins/history',
+                    },
+                },
+            });
             return transaction;
         } catch (error) {
             console.log(error);
