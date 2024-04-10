@@ -1,66 +1,173 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
-import { PersonService } from './person.service';
-import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { User } from '../models/user.model';
-import { Gender } from 'prisma/mongo/generated/client';
+import { Gender, LoginData } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
+import { hash, verify } from 'argon2';
+import { S3Service } from 'src/common/s3/s3.service';
+import { randomUUID } from 'node:crypto';
+import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
+import { FcmService } from 'src/common/firebase/fcm/fcm.service';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
+import { NotificationMessageDTO } from '../dtos/notification.dto';
 
 @Injectable()
 export class UserService {
     constructor(
         private mongoService: MongoService,
-        private personService: PersonService,
+        private s3Service: S3Service,
+        private fcmSevice: FcmService,
     ) {}
+
     async findOneById(id: string) {
         const user = await this.mongoService.user.findUnique({
             where: { id: id },
         });
-        if (!user) {
-            throw new BadRequestException('User not found');
+        if (user.photoProfile) {
+            user.photoProfile.path = `${process.env.S3_BUCKET_URL}/${user.photoProfile.path}`;
         }
         return user;
     }
 
-    async findProfileByEmail(data: PersonTokenPayload) {
-        const person = await this.personService.findOneByEmail(data.username);
-        const user = await this.mongoService.user.findUnique({
-            where: { id: person.id },
+    async findRefreshToken(userId: string, refreshToken: string) {
+        try {
+            const loginData = await this.mongoService.loginSession.findFirst({
+                where: {
+                    userId: userId,
+                },
+                select: {
+                    data: {
+                        select: {
+                            refreshToken: true,
+                        },
+                    },
+                },
+            });
+
+            const refreshTokens = loginData.data.map((val) => val.refreshToken);
+
+            let token = null;
+            for (const data of refreshTokens) {
+                if (
+                    (await verify(data.token, refreshToken)) &&
+                    data.expires > new Date()
+                ) {
+                    token = data;
+                }
+            }
+            if (!token) {
+                throw new UnauthorizedException();
+            }
+            return token;
+        } catch (error) {
+            throw new UnauthorizedException();
+        }
+    }
+
+    async addLoginSession(
+        userId: string,
+        refreshToken: string,
+        refreshTokenExpires: Date,
+        fcmToken: string,
+    ) {
+        refreshToken = await hash(refreshToken);
+        return await this.mongoService.loginSession.upsert({
+            where: {
+                userId: userId,
+            },
+            update: {
+                data: {
+                    push: {
+                        fcmToken: fcmToken,
+                        refreshToken: {
+                            token: refreshToken,
+                            expires: refreshTokenExpires,
+                        },
+                    },
+                },
+            },
+            create: {
+                userId: userId,
+                data: {
+                    fcmToken: fcmToken,
+                    refreshToken: {
+                        token: refreshToken,
+                        expires: refreshTokenExpires,
+                    },
+                },
+            },
         });
-        return { person: person, user: user };
+    }
+
+    async removeLoginSession(userId: string, refreshToken: string) {
+        const { data } = await this.mongoService.loginSession.findUnique({
+            where: {
+                userId: userId,
+            },
+            select: {
+                data: {
+                    select: {
+                        refreshToken: true,
+                        fcmToken: true,
+                    },
+                },
+            },
+        });
+        const verifyToken = async (token: string) => {
+            return token ? await verify(token, refreshToken) : false;
+        };
+
+        const loginResult: LoginData[] = [];
+        for (const login of data) {
+            if (
+                (await verifyToken(login.refreshToken.token)) ||
+                login.refreshToken.expires < new Date()
+            ) {
+                continue;
+            }
+            loginResult.push(login);
+        }
+        return await this.mongoService.loginSession.updateMany({
+            where: {
+                userId: userId,
+            },
+            data: {
+                data: {
+                    set: loginResult,
+                },
+            },
+        });
     }
 
     async inputPersonalData(
-        data: PersonTokenPayload,
+        userId: string,
         name: string,
         gender: Gender,
         birth: Date,
         description: string,
     ): Promise<User | null> {
-        const person = await this.personService.findOneByEmail(data.username);
         const user = await this.mongoService.user.findUnique({
             where: {
-                id: person.id,
+                id: userId,
             },
         });
-        if (user) {
+        if (user.name) {
             throw new BadRequestException('User already exist');
         }
-        const userGallery = await this.mongoService.userGallery.create({
-            data: {
-                createdAt: new Date(),
-                updatedAt: new Date(),
+        return await this.mongoService.user.update({
+            where: {
+                id: userId,
             },
-        });
-        return await this.mongoService.user.create({
             data: {
-                id: person.id,
                 name: name,
                 gender: gender,
                 birth: birth,
                 description: description,
                 photoProfile: null,
-                userGalleryId: userGallery.id,
             },
         });
     }
@@ -105,5 +212,99 @@ export class UserService {
             data: updateData,
         });
         return updateUser;
+    }
+
+    async updateUserPhotoProfile(userId: string, image: Express.Multer.File) {
+        const filename = `${randomUUID()}.jpg`;
+
+        try {
+            image = await compressAndConvertToJPEG(image);
+            image = await resizeImage(image);
+            const user = await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    photoProfile: {
+                        path: filename,
+                        updatedAt: new Date(),
+                    },
+                },
+                select: {
+                    photoProfile: true,
+                },
+            });
+            await this.s3Service.uploadAObject(filename, image);
+            return user;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async deleteUserPhotoProfile(userId: string) {
+        try {
+            const user = await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    photoProfile: null,
+                },
+                select: {
+                    photoProfile: true,
+                },
+            });
+            await this.s3Service.deleteAObject(user.photoProfile.path);
+            return { message: 'Photo profile deleted' };
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async sendNotificationTouUser(
+        userId: string,
+        notificationMessage: NotificationMessageDTO,
+    ) {
+        try {
+            const loginSession =
+                await this.mongoService.loginSession.findUnique({
+                    where: {
+                        userId: userId,
+                    },
+                    select: {
+                        data: {
+                            select: {
+                                fcmToken: true,
+                            },
+                        },
+                    },
+                });
+
+            if (!loginSession) {
+                throw new BadRequestException('User not found');
+            }
+
+            const fcmTokens = loginSession.data.map((val) => val.fcmToken);
+            await this.fcmSevice.sendMessageToMultipleDevices({
+                tokens: fcmTokens,
+                ...notificationMessage,
+            });
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    // DEBUG: this just for testing firebase messaging
+    async testNotificationToUser(message: Message) {
+        console.log(message);
+        try {
+            const parts = (await this.fcmSevice.sendMessage(message)).split(
+                '/',
+            );
+            const notificationId = parts[parts.length - 1];
+            return notificationId;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
     }
 }

@@ -14,14 +14,24 @@ export class CoinTransactionType implements CoinTransactionTypeModel {
 }
 
 export class CoinTransaction implements CoinTransactionModel {
+    webhookId: string;
+    webhookCreated: string;
+    coinAmount: number;
+    expiresAt: Date;
+    bankCode: string;
     id: string;
     userAccountId: string;
-    coinAmount: bigint;
     moneyAmount: number;
     transactionFee: number;
     status: CoinTransactionStatus;
-    bankAccountNumber: bigint;
+    bankAccountNumber: string;
     createdAt: Date;
     updatedAt: Date;
     transactionTypeId: number;
+}
+
+export class CoinPackage implements CoinPackage {
+    id: number;
+    coinAmount: bigint;
+    price: number;
 }

@@ -3,6 +3,7 @@ import {
     Gender as GenderEnum,
     UserPassion as UserPassionModel,
     UserPhotoProfile as UserPhotoProfileModel,
+    $Enums,
 } from '../../../prisma/mongo/generated/client';
 
 export type Gender = GenderEnum;
@@ -19,15 +20,16 @@ export class UserPhotoProfile implements UserPhotoProfileModel {
 }
 
 export class User implements UserModel {
+    matchClass: $Enums.MatchClass;
     id: string;
     name: string;
-    gender: Gender;
+    gender: $Enums.Gender;
     birth: Date;
     description: string;
     coinAmount: number;
     createdAt: Date;
     updatedAt: Date;
     userGalleryId: string;
-    photoProfile: UserPhotoProfile;
-    passions: UserPassion[];
+    photoProfile: { path: string; updatedAt: Date };
+    passions: { name: string; createdAt: Date; deletedAt: Date }[];
 }

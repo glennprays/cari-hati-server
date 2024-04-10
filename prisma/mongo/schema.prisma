@@ -10,15 +10,16 @@ datasource db {
 
 model User {
     id            String            @id @map("_id")
-    name          String
+    name          String?
     photoProfile  UserPhotoProfile?
-    gender        Gender
-    birth         DateTime          @db.Date
-    description   String
+    gender        Gender?
+    birth         DateTime?         @db.Date
+    description   String?
     coinAmount    Int               @default(0)
+    matchClass    MatchClass?       @map("match_class")
     passions      UserPassion[]
-    createdAt     DateTime          @default(now())
-    updatedAt     DateTime          @default(now())
+    createdAt     DateTime?         @default(now())
+    updatedAt     DateTime?         @default(now())
     userGallery   UserGallery?      @relation("UserGallery", fields: [userGalleryId], references: [id])
     userGalleryId String?           @unique @db.ObjectId
     Notification  Notification[]    @relation("Notification")
@@ -26,6 +27,32 @@ model User {
     Blocked       Blocked[]         @relation("Blocked")
     sender        UserMatch[]       @relation("MatchSender")
     receiver      UserMatch[]       @relation("MatchReceiver")
+    LoginSession  LoginSession?
+}
+
+enum MatchClass {
+    A
+    B
+    C
+    D
+    E
+}
+
+model LoginSession {
+    id     String      @id @default(auto()) @map("_id") @db.ObjectId
+    userId String      @unique
+    user   User        @relation(fields: [userId], references: [id])
+    data   LoginData[] @unique @map("login_data")
+}
+
+type RefreshToken {
+    token   String
+    expires DateTime @default(now())
+}
+
+type LoginData {
+    refreshToken RefreshToken @map("refresh_token")
+    fcmToken     String       @map("fcm_token")
 }
 
 type UserPhotoProfile {
@@ -46,7 +73,7 @@ type UserPassion {
 
 model Passion {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    name      String
+    name      String   @unique
     createdAt DateTime @default(now())
 }
 
@@ -107,21 +134,13 @@ enum MatchStatus {
 }
 
 model UserMatch {
-    id           String        @id @default(auto()) @map("_id") @db.ObjectId
-    senderId     String
-    receiverId   String
-    liked        Boolean
-    status       MatchStatus
-    updatedAt    DateTime      @default(now())
-    createdAt    DateTime      @default(now())
-    sender       User          @relation("MatchSender", fields: [senderId], references: [id])
-    receiver     User          @relation("MatchReceiver", fields: [receiverId], references: [id])
-    conversation Conversation?
-}
-
-model Conversation {
-    id        String    @id @default(auto()) @map("_id") @db.ObjectId
-    matchId   String    @unique @db.ObjectId
-    match     UserMatch @relation(fields: [matchId], references: [id])
-    createdAt DateTime  @default(now())
+    id         String      @id @map("_id")
+    senderId   String
+    receiverId String
+    liked      Boolean
+    status     MatchStatus
+    updatedAt  DateTime    @default(now())
+    createdAt  DateTime    @default(now())
+    sender     User        @relation("MatchSender", fields: [senderId], references: [id])
+    receiver   User        @relation("MatchReceiver", fields: [receiverId], references: [id])
 }
