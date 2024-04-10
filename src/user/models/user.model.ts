@@ -20,6 +20,7 @@ export class UserPhotoProfile implements UserPhotoProfileModel {
 }
 
 export class User implements UserModel {
+    matchClass: $Enums.MatchClass;
     id: string;
     name: string;
     gender: $Enums.Gender;

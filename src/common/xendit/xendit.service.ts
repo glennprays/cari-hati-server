@@ -12,4 +12,11 @@ export class XenditService {
             virtualAccountRequest,
         );
     }
+
+    async simulateFixVirtualAccountPayment(externalId: string, amount: number) {
+        return await this.xenditClient.simulateFixVirtualAccountPayment(
+            externalId,
+            amount,
+        );
+    }
 }

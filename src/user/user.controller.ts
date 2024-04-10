@@ -10,19 +10,16 @@ import {
     UploadedFile,
     Put,
     Delete,
+    Query,
+    Param,
 } from '@nestjs/common';
-import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import {
-    UserGetAllMatchDTO,
-    UserRequestMatchDTO,
-    UserResposeDTO,
-    UserUnmatchMatchDTO,
-    UserUpdateDTO,
-} from 'src/user/dtos/user.dto';
+import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserService } from './services/user.service';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 
-@Controller('users')
+@Controller('')
 export class UserController {
     constructor(private userService: UserService) {}
 
@@ -77,40 +74,25 @@ export class UserController {
     }
 
     @UseGuards(JwtGuard)
-    @Post('matches')
-    async requestMatch(
-        @Body() userRequestMatchDTO: UserRequestMatchDTO,
-        @Request() req,
-    ) {
-        return await this.userService.userRequestMatch(
+    @Get('notifications')
+    async getNotifications(@Request() req, @Query() query: any) {
+        return this.userService.getUserNotifications(
             req.user.sub.id,
-            userRequestMatchDTO.receiverId,
-            userRequestMatchDTO.liked,
+            +query.limit,
+            +query.offset,
         );
     }
 
-       @UseGuards(JwtGuard)
-    @Get('matches')
-    async getUserMatch(
-        @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
-        @Request() req
-        ) {
-        return this.userService.findAllMatchesByUserId(
-            req.user.sub.id,
-            userGetAllMatchDTO.accepted_only,
-            );
-    }
-    
     @UseGuards(JwtGuard)
-    @Delete('matches')
-    async unmatchWithUser(
-        @Body() userUnmatchtMatchDTO: UserUnmatchMatchDTO,
+    @Put('notifications/:notificationId')
+    async updateNotificationReadAt(
         @Request() req,
-        ) {
-        return this.userService.unmatchWithUser(
+        @Param('notificationId') notificationId: string,
+    ) {
+        return this.userService.updateNotificationReadAt(
             req.user.sub.id,
-            userUnmatchtMatchDTO.receiverId,
-            );
+            notificationId,
+        );
     }
 
     @UseGuards(JwtGuard)
@@ -119,5 +101,9 @@ export class UserController {
         return this.userService.findOneById(req.user.sub.id);
     }
 
-
+    // DEBUG: this just for testing firebase messaging
+    @Post('notification')
+    async testNotificationToUser(@Body() message: Message) {
+        return await this.userService.testNotificationToUser(message);
+    }
 }
