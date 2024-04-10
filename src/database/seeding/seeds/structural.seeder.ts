@@ -37,22 +37,22 @@ export async function structuralSeeder(
     );
     Promise.all(coinTransactionTypes);
 
-    const coinPackages = rawData.coinPackage.map(coinPackage => ({
-        coinAmount: BigInt(coinPackage.coinAmount), 
-        price: coinPackage.price
+    const coinPackages = rawData.coinPackage.map((coinPackage) => ({
+        coinAmount: BigInt(coinPackage.coinAmount),
+        price: coinPackage.price,
     }));
     const createManyCoinPackages = coinPackages.map((coinPackage) =>
         postgres.coinPackage.upsert({
-            where: { 
+            where: {
                 coinAmount_price: {
                     coinAmount: coinPackage.coinAmount,
-                    price: coinPackage.price
-                }
+                    price: coinPackage.price,
+                },
             },
             update: {},
             create: coinPackage,
         }),
     );
-    
+
     await Promise.all(createManyCoinPackages);
 }

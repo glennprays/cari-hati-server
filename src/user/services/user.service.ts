@@ -13,6 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 import { FcmService } from 'src/common/firebase/fcm/fcm.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
+import { NotificationMessageDTO } from '../dtos/notification.dto';
 
 @Injectable()
 export class UserService {
@@ -260,8 +261,42 @@ export class UserService {
         }
     }
 
+    async sendNotificationTouUser(
+        userId: string,
+        notificationMessage: NotificationMessageDTO,
+    ) {
+        try {
+            const loginSession =
+                await this.mongoService.loginSession.findUnique({
+                    where: {
+                        userId: userId,
+                    },
+                    select: {
+                        data: {
+                            select: {
+                                fcmToken: true,
+                            },
+                        },
+                    },
+                });
+
+            if (!loginSession) {
+                throw new BadRequestException('User not found');
+            }
+
+            const fcmTokens = loginSession.data.map((val) => val.fcmToken);
+            await this.fcmSevice.sendMessageToMultipleDevices({
+                tokens: fcmTokens,
+                ...notificationMessage,
+            });
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
     // DEBUG: this just for testing firebase messaging
-    async sendNotificationToUser(message: Message) {
+    async testNotificationToUser(message: Message) {
+        console.log(message);
         try {
             const parts = (await this.fcmSevice.sendMessage(message)).split(
                 '/',

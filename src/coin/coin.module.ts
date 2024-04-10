@@ -5,9 +5,17 @@ import { CoinService } from './services/coin.service';
 import { CoinController } from './coin.controller';
 import { UserModule } from 'src/user/user.module';
 import { DatabaseModule } from 'src/common/database/database.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { MailModule } from 'src/common/mail/mail.module';
 
 @Module({
-    imports: [XenditModule, UserModule, DatabaseModule],
+    imports: [
+        XenditModule,
+        UserModule,
+        DatabaseModule,
+        ScheduleModule.forRoot(),
+        MailModule,
+    ],
     providers: [XenditService, CoinService],
     controllers: [CoinController],
 })
