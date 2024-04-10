@@ -95,6 +95,12 @@ export class UserController {
         );
     }
 
+    @UseGuards(JwtGuard)
+    @Get('passions')
+    async getPassions(@Request() req) {
+        return this.userService.findOneById(req.user.sub.id);
+    }
+
     // DEBUG: this just for testing firebase messaging
     @Post('notification')
     async testNotificationToUser(@Body() message: Message) {
