@@ -278,6 +278,13 @@ export class UserService {
         }
     }
 
+    async updateNotificationReadAt(userId: string, notificationId: string) {
+        return await this.notificationService.updateNotificationReadAt(
+            userId,
+            notificationId,
+        );
+    }
+
     // DEBUG: this just for testing firebase messaging
     async testNotificationToUser(message: Message) {
         console.log(message);
