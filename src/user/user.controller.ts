@@ -6,19 +6,25 @@ import {
     Post,
     Body,
     Patch,
+    UseInterceptors,
+    UploadedFile,
+    Put,
+    Delete,
 } from '@nestjs/common';
-import { UserService } from './services/user.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UserService } from './services/user.service';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 
-@Controller('users')
+@Controller('')
 export class UserController {
     constructor(private userService: UserService) {}
 
     @UseGuards(JwtGuard)
     @Get('profile')
     async getProfile(@Request() req) {
-        return this.userService.findProfileByEmail(req.user);
+        return this.userService.findOneById(req.user.sub.id);
     }
 
     @UseGuards(JwtGuard)
@@ -28,7 +34,7 @@ export class UserController {
         @Request() req,
     ) {
         const user = await this.userService.inputPersonalData(
-            req.user,
+            req.user.sub.id,
             userResposeDTO.name,
             userResposeDTO.gender,
             userResposeDTO.birth,
@@ -47,5 +53,27 @@ export class UserController {
             birth: userUpdateDTO.birth,
             description: userUpdateDTO.description,
         });
+    }
+
+    @UseGuards(JwtGuard)
+    @Put('profile/photo')
+    @UseInterceptors(FileInterceptor('image'))
+    async updateUserPhotoProfile(
+        @UploadedFile() image: Express.Multer.File,
+        @Request() req,
+    ) {
+        return this.userService.updateUserPhotoProfile(req.user.sub.id, image);
+    }
+
+    @UseGuards(JwtGuard)
+    @Delete('profile/photo')
+    async deleteUserPhotoProfile(@Request() req) {
+        return this.userService.deleteUserPhotoProfile(req.user.sub.id);
+    }
+
+    // DEBUG: this just for testing firebase messaging
+    @Post('notification')
+    async testNotificationToUser(@Body() message: Message) {
+        return await this.userService.testNotificationToUser(message);
     }
 }

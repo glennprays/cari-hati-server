@@ -29,6 +29,20 @@ export class XenditClient {
             throw new Error(error.message);
         }
     }
+
+    async simulateFixVirtualAccountPayment(externalId: string, amount: number) {
+        try {
+            const { data } = await this.axios.post(
+                `/callback_virtual_accounts/external_id=${externalId}/simulate_payment`,
+                {
+                    amount: amount,
+                },
+            );
+            return data;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
 }
 
 export type VirtualAccountRequestParameter = {
@@ -58,9 +72,20 @@ export type VirtualAccountRequestResponse = {
     country: Country;
 };
 
+export type WebhookResponse = {
+    id: string;
+    account_number: string;
+    amount: number;
+    bank_code: BankCode;
+    external_id: string;
+    created: string;
+};
+
 export type BankCode = 'BCA' | 'BNI' | 'BRI' | 'MANDIRI';
 
 export type VirtualAccountStatus = 'PENDING' | 'INACTIVE' | 'ACTIVE';
+
+export type TransactionStatus = 'SUCCEEDED' | 'FAILED';
 
 export type Currency = 'IDR';
 

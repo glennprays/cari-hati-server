@@ -1,3 +1,4 @@
+import { MatchStatus } from 'prisma/mongo/generated/client';
 import { Gender } from '../models/user.model';
 import { UserPhotoProfile } from '../models/user.model';
 import { UserPassion } from '../models/user.model';
@@ -21,4 +22,22 @@ export class UserUpdateDTO {
     gender?: Gender;
     birth?: Date;
     description?: string;
+}
+
+export class UserRequestMatchDTO {
+    receiverId: string;
+    liked?: boolean;
+}
+
+export class UserUnmatchMatchDTO {
+    receiverId: string;
+}
+
+export class UserGetAllMatchDTO {
+    accepted_only: boolean;
+}
+
+export class UserUpdateStatusMatchDTO {
+    id: string;
+    state: MatchStatus;
 }

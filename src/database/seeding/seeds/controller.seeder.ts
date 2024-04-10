@@ -2,6 +2,7 @@ import { parseArgs } from 'node:util';
 import { PrismaClient as PostgresClient } from '../../../../prisma/postgres/generated/client';
 import { PrismaClient as MongoClient } from '../../../../prisma/mongo/generated/client';
 import { dummySeeder } from './dummy.seeder';
+import { structuralSeeder } from './structural.seeder';
 
 const postgres = new PostgresClient();
 const mongo = new MongoClient();
@@ -18,6 +19,9 @@ async function main() {
     switch (mode) {
         case 'dummy':
             await dummySeeder(mongo, postgres);
+            break;
+        case 'structural':
+            await structuralSeeder(mongo, postgres);
             break;
         default:
             throw new Error('Failed! Invalid mode');

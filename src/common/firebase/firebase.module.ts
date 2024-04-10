@@ -1,19 +1,26 @@
 import { Module } from '@nestjs/common';
 import { FcmService } from './fcm/fcm.service';
+import { ServiceAccount, credential } from 'firebase-admin';
 import * as admin from 'firebase-admin';
 
-admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-});
+const adminConfig: ServiceAccount = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+};
 
 @Module({
     providers: [
         {
-            provide: 'FirebaseAdmin',
-            useValue: admin,
+            provide: 'FIREBASE_ADMIN',
+            useFactory: () => {
+                return admin.initializeApp({
+                    credential: credential.cert(adminConfig),
+                });
+            },
         },
         FcmService,
     ],
-    exports: ['FirebaseAdmin'],
+    exports: ['FIREBASE_ADMIN', FcmService],
 })
 export class FirebaseModule {}
