@@ -17,7 +17,7 @@ import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 import { NotificationService } from 'src/notification/services/notification.service';
 import { MatchService } from '../features/match/match.service';
 import { PassionDTO } from 'src/data/dtos/passion.dto';
-import { CoinService } from 'src/coin/services/coin.service';
+import { PostgresService } from 'src/common/database/postgres/postgres.service';
 
 @Injectable()
 export class UserService {
@@ -28,6 +28,7 @@ export class UserService {
         private fcmSevice: FcmService,
         private notificationService: NotificationService,
         private matchService: MatchService,
+        private postgresService: PostgresService,
     ) {}
 
     async findOneById(id: string) {
@@ -363,6 +364,64 @@ export class UserService {
             return user.coinAmount;
         } catch (error) {
             throw new BadRequestException('Failed to get user coins');
+        }
+    }
+
+    async updateUserCoins(userId: string, coinAmount: number) {
+        try {
+            return await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    coinAmount: {
+                        increment: coinAmount,
+                    },
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException('Failed to update user coins');
+        }
+    }
+
+    async getUserGiftTransactions(userId: string, type?: 'sent' | 'received') {
+        try {
+            const user = await this.findOneById(userId);
+            if (!user) {
+                throw new Error('User not exist');
+            }
+            const queryParam = {
+                OR: [
+                    {
+                        senderAccountId: userId,
+                    },
+                    {
+                        receiverAccountId: userId,
+                    },
+                ],
+            };
+            if (type) {
+                if (type === 'sent') {
+                    queryParam.OR = [
+                        {
+                            senderAccountId: userId,
+                        },
+                    ];
+                } else {
+                    queryParam.OR = [
+                        {
+                            receiverAccountId: userId,
+                        },
+                    ];
+                }
+            }
+            const transactions =
+                await this.postgresService.giftTransaction.findMany({
+                    where: queryParam,
+                });
+            return transactions;
+        } catch (error) {
+            throw new Error('Error while fetching gift transactions');
         }
     }
 
