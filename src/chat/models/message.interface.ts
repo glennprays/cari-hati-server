@@ -1,5 +1,6 @@
 export interface Message {
     sender: string;
-    text: string;
+    text?: string;
+    gift?: string;
     createdAt: string;
 }

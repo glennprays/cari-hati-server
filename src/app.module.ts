@@ -9,7 +9,6 @@ import { GiftModule } from './gift/gift.module';
 import { NotificationModule } from './notification/notification.module';
 import { CoinModule } from './coin/coin.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthController } from './auth/auth.controller';
 import { DataModule } from './data/data.module';
 
 @Module({
@@ -26,7 +25,7 @@ import { DataModule } from './data/data.module';
         }),
         DataModule,
     ],
-    controllers: [AppController, AuthController],
+    controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule {}

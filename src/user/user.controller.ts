@@ -97,6 +97,18 @@ export class UserController {
     }
 
     @UseGuards(JwtGuard)
+    @Get('notifications/unread')
+    async getUnreadNotificationCount(@Request() req) {
+        return this.userService.getUnreadNotificationCount(req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('coins')
+    async getUserCoins(@Request() req) {
+        return this.userService.getUserCoins(req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
     @Get('passions')
     async getPassions(@Request() req) {
         return await this.userService.getUserPassions(req.user.sub.id);
@@ -106,6 +118,18 @@ export class UserController {
     @Put('passions')
     async updatePassions(@Request() req, @Body() data: PassionDTO[]) {
         return await this.userService.updateUserPassions(req.user.sub.id, data);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('gifts')
+    async getUserGifts(
+        @Request() req,
+        @Query('type') type: 'sent' | 'received',
+    ) {
+        return await this.userService.getUserGiftTransactions(
+            req.user.sub.id,
+            type,
+        );
     }
 
     // DEBUG: this just for testing firebase messaging
