@@ -15,7 +15,7 @@ export class MatchService {
         if (senderId === receiverId) {
             throw new BadRequestException('');
         }
-    
+
         const sender = await this.mongoService.user.findUnique({
             where: {
                 id: senderId,
@@ -24,7 +24,7 @@ export class MatchService {
                 gender: true,
             },
         });
-    
+
         const receiver = await this.mongoService.user.findUnique({
             where: {
                 id: receiverId,
@@ -33,15 +33,17 @@ export class MatchService {
                 gender: true,
             },
         });
-    
+
         if (!sender || !receiver) {
             throw new BadRequestException('Sender or receiver not found');
         }
-    
+
         if (sender.gender === receiver.gender) {
-            throw new BadRequestException('Sender and receiver have the same gender');
+            throw new BadRequestException(
+                'Sender and receiver have the same gender',
+            );
         }
-    
+
         const matchId = `${senderId}-${receiverId}`;
         const userMatch = await this.mongoService.userMatch.findFirst({
             where: {
@@ -51,11 +53,11 @@ export class MatchService {
                 },
             },
         });
-    
+
         if (userMatch) {
             throw new BadRequestException('User already has matched data');
         }
-    
+
         return await this.mongoService.userMatch.create({
             data: {
                 id: matchId,
@@ -74,7 +76,7 @@ export class MatchService {
             },
         });
     }
-    
+
     async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
         const whereClause: any = {
             OR: [{ senderId: userId }, { receiverId: userId }],

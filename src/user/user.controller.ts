@@ -73,7 +73,7 @@ export class UserController {
 
     // DEBUG: this just for testing firebase messaging
     @Post('notification')
-    async sendNotificationToUser(@Body() message: Message) {
-        return await this.userService.sendNotificationToUser(message);
+    async testNotificationToUser(@Body() message: Message) {
+        return await this.userService.testNotificationToUser(message);
     }
 }
