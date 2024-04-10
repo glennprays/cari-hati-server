@@ -172,8 +172,7 @@ export class MatchService {
                 },
             );
             const result = await response.json();
-            console.log(result);
-            return result;
+            return result.class_name;
         } catch (error) {
             throw new BadRequestException('Classifier error');
         }
