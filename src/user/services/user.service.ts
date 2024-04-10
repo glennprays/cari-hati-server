@@ -2,7 +2,6 @@ import {
     BadRequestException,
     Injectable,
     UnauthorizedException,
-    Query
 } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { User } from '../models/user.model';
@@ -16,15 +15,18 @@ import { DataService } from 'src/data/data.service';
 import { FcmService } from 'src/common/firebase/fcm/fcm.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 import { NotificationService } from 'src/notification/services/notification.service';
+import { MatchService } from '../features/match/match.service';
+import { PassionDTO } from 'src/data/dtos/passion.dto';
 
 @Injectable()
 export class UserService {
     constructor(
         private mongoService: MongoService,
         private s3Service: S3Service,
-        private dataService: DataService
+        private dataService: DataService,
         private fcmSevice: FcmService,
         private notificationService: NotificationService,
+        private matchService: MatchService,
     ) {}
 
     async findOneById(id: string) {
@@ -288,6 +290,59 @@ export class UserService {
         );
     }
 
+    async updateUserPassions(userId: string, data: PassionDTO[]) {
+        try {
+            data = [...new Set(data)];
+            if (data.length !== 5) {
+                throw new BadRequestException('Passions should be 5');
+            }
+            const passions = await this.dataService.getPassionsByIds(data);
+            if (passions.length !== 5) {
+                throw new BadRequestException('Passions not found');
+            }
+            const matchClass =
+                await this.matchService.calculateUserMatchClass(passions);
+            const user = await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    passions: {
+                        set: passions.map((val) => {
+                            return {
+                                name: val.name,
+                                createdAt: new Date(),
+                            };
+                        }),
+                    },
+                    matchClass: matchClass,
+                },
+                select: {
+                    passions: true,
+                },
+            });
+            return user.passions;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async getUserPassions(userId: string) {
+        try {
+            const user = await this.mongoService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                select: {
+                    passions: true,
+                },
+            });
+            return user.passions;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
     // DEBUG: this just for testing firebase messaging
     async testNotificationToUser(message: Message) {
         console.log(message);
@@ -301,5 +356,4 @@ export class UserService {
             throw new BadRequestException(error);
         }
     }
-
 }
