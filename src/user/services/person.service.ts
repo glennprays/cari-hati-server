@@ -3,7 +3,7 @@ import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Person } from '../models/person.model';
 import { PersonRole } from 'prisma/postgres/generated/client';
 import { hash } from 'argon2';
-import { PersonRegisterDTO } from '../dtos/person.dto';
+import { PersonDTO } from '../dtos/person.dto';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 
@@ -36,9 +36,8 @@ export class PersonService {
                     },
                     LoginSession: {
                         create: {
-                            refreshTokens: {
-                                token: '',
-                                expires: new Date(),
+                            data: {
+                                set: [],
                             },
                         },
                     },
@@ -65,7 +64,7 @@ export class PersonService {
         email?: string;
         password?: string;
     }): Promise<Person | null> {
-        const updateData: PersonRegisterDTO & { updatedAt: Date } = {
+        const updateData: PersonDTO & { updatedAt: Date } = {
             updatedAt: new Date(),
         };
 

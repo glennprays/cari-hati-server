@@ -44,6 +44,7 @@ redis_data
 s3_data
 
 service-account-file.json
+cert.json
 
 prisma/mongo/generated/*
 prisma/postgres/generated/*

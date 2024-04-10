@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ChatService } from './core/chat.service';
-import { RoomService } from './features/rooms/room.service';
-import { NotificationService } from './features/notifications/notification.service';
+import { RoomService } from './core/room.service';
+import { ChatGateway } from './core/chat-gateway';
+import { DatabaseModule } from 'src/common/database/database.module';
+import { MessageService } from './core/message.service.ts';
+import { MatchModule } from 'src/user/features/match/match.module';
 
 @Module({
-    providers: [ChatService, RoomService, NotificationService],
+    providers: [RoomService, ChatGateway, MessageService],
+    imports: [DatabaseModule, MatchModule],
 })
 export class ChatModule {}

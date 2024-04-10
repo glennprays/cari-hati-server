@@ -5,24 +5,26 @@ import {
     Query
 } from '@nestjs/common';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
-import { PersonService } from './person.service';
 import { User } from '../models/user.model';
-import { Gender, MatchStatus } from 'prisma/mongo/generated/client';
+import { Gender, LoginData } from 'prisma/mongo/generated/client';
 import { UserUpdateDTO } from '../dtos/user.dto';
 import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
 import { randomUUID } from 'node:crypto';
 import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 import { DataService } from 'src/data/data.service';
-
+import { FcmService } from 'src/common/firebase/fcm/fcm.service';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private mongoService: MongoService,
-        private personService: PersonService,
         private s3Service: S3Service,
         private dataService: DataService
+        private fcmSevice: FcmService,
+        private notificationService: NotificationService,
     ) {}
 
     async findOneById(id: string) {
@@ -36,29 +38,45 @@ export class UserService {
     }
 
     async findRefreshToken(userId: string, refreshToken: string) {
-        const loginSession = await this.mongoService.loginSession.findFirst({
-            where: {
-                userId: userId,
-            },
-        });
-        const verifyToken = async (token: string) => {
-            return token ? await verify(token, refreshToken) : false;
-        };
-        const status = loginSession.refreshTokens.some(async (token) => {
-            return (
-                (await verifyToken(token.token)) && token.expires > new Date()
-            );
-        });
-        if (!status) {
+        try {
+            const loginData = await this.mongoService.loginSession.findFirst({
+                where: {
+                    userId: userId,
+                },
+                select: {
+                    data: {
+                        select: {
+                            refreshToken: true,
+                        },
+                    },
+                },
+            });
+
+            const refreshTokens = loginData.data.map((val) => val.refreshToken);
+
+            let token = null;
+            for (const data of refreshTokens) {
+                if (
+                    (await verify(data.token, refreshToken)) &&
+                    data.expires > new Date()
+                ) {
+                    token = data;
+                }
+            }
+            if (!token) {
+                throw new UnauthorizedException();
+            }
+            return token;
+        } catch (error) {
             throw new UnauthorizedException();
         }
-        return loginSession;
     }
 
     async addLoginSession(
         userId: string,
         refreshToken: string,
         refreshTokenExpires: Date,
+        fcmToken: string,
     ) {
         refreshToken = await hash(refreshToken);
         return await this.mongoService.loginSession.upsert({
@@ -66,63 +84,64 @@ export class UserService {
                 userId: userId,
             },
             update: {
-                refreshTokens: {
+                data: {
                     push: {
-                        token: refreshToken,
-                        expires: refreshTokenExpires,
+                        fcmToken: fcmToken,
+                        refreshToken: {
+                            token: refreshToken,
+                            expires: refreshTokenExpires,
+                        },
                     },
                 },
             },
             create: {
                 userId: userId,
-                refreshTokens: {
-                    set: [
-                        {
-                            token: refreshToken,
-                            expires: refreshTokenExpires,
-                        },
-                    ],
+                data: {
+                    fcmToken: fcmToken,
+                    refreshToken: {
+                        token: refreshToken,
+                        expires: refreshTokenExpires,
+                    },
                 },
             },
         });
     }
 
     async removeLoginSession(userId: string, refreshToken: string) {
-        const { refreshTokens } =
-            await this.mongoService.loginSession.findUnique({
-                where: {
-                    userId: userId,
+        const { data } = await this.mongoService.loginSession.findUnique({
+            where: {
+                userId: userId,
+            },
+            select: {
+                data: {
+                    select: {
+                        refreshToken: true,
+                        fcmToken: true,
+                    },
                 },
-                select: {
-                    refreshTokens: true,
-                },
-            });
+            },
+        });
         const verifyToken = async (token: string) => {
             return token ? await verify(token, refreshToken) : false;
         };
-        const result = [];
-        for (const token of refreshTokens) {
+
+        const loginResult: LoginData[] = [];
+        for (const login of data) {
             if (
-                (await verifyToken(token.token)) ||
-                token.expires < new Date()
+                (await verifyToken(login.refreshToken.token)) ||
+                login.refreshToken.expires < new Date()
             ) {
                 continue;
             }
-            result.push(token);
+            loginResult.push(login);
         }
-        if (result.length === 0) {
-            result.push({
-                token: '',
-                expires: new Date(),
-            });
-        }
-        return await this.mongoService.loginSession.update({
+        return await this.mongoService.loginSession.updateMany({
             where: {
                 userId: userId,
             },
             data: {
-                refreshTokens: {
-                    set: result,
+                data: {
+                    set: loginResult,
                 },
             },
         });
@@ -199,45 +218,6 @@ export class UserService {
         return updateUser;
     }
 
-    async userRequestMatch(
-        senderId: string,
-        receiverId: string,
-        liked?: boolean,
-    ) {
-        if (senderId == receiverId) {
-            throw new BadRequestException('');
-        }
-        const userMatch = await this.mongoService.userMatch.findFirst({
-            where: {
-                senderId: senderId,
-                receiverId: receiverId,
-                status: {
-                    not: MatchStatus.ignored,
-                },
-            },
-        });
-
-        if (userMatch) {
-            throw new BadRequestException('User already have matched data');
-        }
-        return await this.mongoService.userMatch.create({
-            data: {
-                sender: {
-                    connect: {
-                        id: senderId,
-                    },
-                },
-                receiver: {
-                    connect: {
-                        id: receiverId,
-                    },
-                },
-                liked: liked || false,
-                status: MatchStatus.pending,
-            },
-        });
-    }
-
     async updateUserPhotoProfile(userId: string, image: Express.Multer.File) {
         const filename = `${randomUUID()}.jpg`;
 
@@ -285,47 +265,40 @@ export class UserService {
         }
     }
 
-    async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
-        let whereClause: any = {
-            OR: [{ senderId: userId }, { receiverId: userId }],
-        };
-
-        if (accepted_only) {
-            whereClause.status = MatchStatus.accepted;
+    async getUserNotifications(
+        userId: string,
+        limit?: number,
+        offset?: number,
+    ) {
+        try {
+            return await this.notificationService.getUserNotifications(
+                userId,
+                limit,
+                offset,
+            );
+        } catch (error) {
+            throw new BadRequestException(error);
         }
-
-        const userMatches = await this.mongoService.userMatch.findMany({
-            where: whereClause,
-        });
-
-        return userMatches;
     }
 
-    async unmatchWithUser(currentUser: string, targetUser: string) {
+    async updateNotificationReadAt(userId: string, notificationId: string) {
+        return await this.notificationService.updateNotificationReadAt(
+            userId,
+            notificationId,
+        );
+    }
+
+    // DEBUG: this just for testing firebase messaging
+    async testNotificationToUser(message: Message) {
+        console.log(message);
         try {
-            const unmatch = await this.mongoService.userMatch.deleteMany({
-                where: {
-                    OR: [
-                        {
-                            senderId: currentUser,
-                            receiverId: targetUser,
-                        },
-                        {
-                            senderId: targetUser,
-                            receiverId: currentUser,
-                        },
-                    ],
-                    status: MatchStatus.accepted,
-                },
-            });
-
-            if (unmatch.count === 0) {
-                throw new Error('Unmatch Failed');
-            }
-
-            return { message: 'Unmatched successfully' };
+            const parts = (await this.fcmSevice.sendMessage(message)).split(
+                '/',
+            );
+            const notificationId = parts[parts.length - 1];
+            return notificationId;
         } catch (error) {
-            throw new BadRequestException(error.message);
+            throw new BadRequestException(error);
         }
     }
 
