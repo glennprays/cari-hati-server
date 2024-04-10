@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
+import { MatchService } from 'src/user/features/match/match.service';
 import { UserService } from 'src/user/services/user.service';
 
 @Injectable()
@@ -7,6 +8,7 @@ export class GiftService {
     constructor(
         private postgresService: PostgresService,
         private userService: UserService,
+        private matchService: MatchService,
     ) {}
     async getGiftItems() {
         try {
@@ -30,15 +32,21 @@ export class GiftService {
         }
     }
 
-    async sendGift(senderId: string, receiverId: string, giftId: string) {
+    async sendGift(senderId: string, matchId: string, giftId: string) {
         try {
-            if (senderId === receiverId) {
-                throw new Error('Sender and receiver cannot be the same');
-            }
             const giftItem = await this.getGiftItemById(giftId);
             if (!giftId) {
                 throw new Error('Gift Item not exist');
             }
+
+            const match = await this.matchService.getMatchById(matchId);
+            let giftReceiver: string;
+            if (match.senderId === senderId) {
+                giftReceiver = match.receiverId;
+            } else {
+                giftReceiver = match.senderId;
+            }
+
             const senderCoins = await this.userService.getUserCoins(senderId);
             if (senderCoins < giftItem.coinAmount) {
                 throw new Error('User coins insufficient');
@@ -47,9 +55,16 @@ export class GiftService {
                 await this.postgresService.giftTransaction.create({
                     data: {
                         senderAccountId: senderId,
-                        receiverAccountId: receiverId,
+                        receiverAccountId: giftReceiver,
                         giftItemId: giftId,
                         coinAmount: giftItem.coinAmount,
+                    },
+                    select: {
+                        giftItem: {
+                            select: {
+                                imagePath: true,
+                            },
+                        },
                     },
                 });
             await this.userService.updateUserCoins(
@@ -57,7 +72,7 @@ export class GiftService {
                 -giftItem.coinAmount,
             );
             await this.userService.updateUserCoins(
-                receiverId,
+                giftReceiver,
                 giftItem.coinAmount,
             );
             return giftTransaction;
