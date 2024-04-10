@@ -43,7 +43,7 @@
         },
         {
             "coinAmount": 100,
-            "price": 40000  
+            "price": 40000
         },
         {
             "coinAmount": 200,
@@ -68,6 +68,38 @@
         {
             "coinAmount": 10000,
             "price": 3030000
+        }
+    ],
+    "giftItems": [
+        {
+            "name": "love",
+            "amount": 20,
+            "image": "gift-love.png"
+        },
+        {
+            "name": "bear",
+            "amount": 25,
+            "image": "gift-bear.png"
+        },
+        {
+            "name": "ballon",
+            "amount": 15,
+            "image": "gift-ballon.png"
+        },
+        {
+            "name": "angel",
+            "amount": 25,
+            "image": "gift-angel.png"
+        },
+        {
+            "name": "pizza",
+            "amount": 30,
+            "image": "gift-pizza.png"
+        },
+        {
+            "name": "mug",
+            "amount": 35,
+            "image": "gift-mug.png"
         }
     ]
 }

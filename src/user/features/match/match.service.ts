@@ -172,8 +172,7 @@ export class MatchService {
                 },
             );
             const result = await response.json();
-            console.log(result);
-            return result;
+            return result.class_name;
         } catch (error) {
             throw new BadRequestException('Classifier error');
         }
@@ -223,6 +222,24 @@ export class MatchService {
                 'Recommendation error:',
                 error.message,
             );
+        }
+    }
+
+    async getMatchById(matchId: string) {
+        try {
+            const match = await this.mongoService.userMatch.findUnique({
+                where: {
+                    id: matchId,
+                },
+            });
+
+            if (!match) {
+                throw new BadRequestException('Match not found');
+            }
+
+            return match;
+        } catch (error) {
+            throw new BadRequestException('Match not found');
         }
     }
 }

@@ -99,22 +99,19 @@ enum NotificationType {
     match
     anoucement
     warning
+    transaction
 }
 
 model Notification {
-    id        String            @id @default(auto()) @map("_id") @db.ObjectId
+    id        String           @id @default(auto()) @map("_id") @db.ObjectId
     userId    String
-    user      User              @relation("Notification", fields: [userId], references: [id])
+    user      User             @relation("Notification", fields: [userId], references: [id])
     title     String
     body      String
-    data      NotificationData?
+    path      String
     readAt    DateTime?
     type      NotificationType
-    createdAt DateTime          @default(now())
-}
-
-type NotificationData {
-    userId String
+    createdAt DateTime         @default(now())
 }
 
 model Blocked {

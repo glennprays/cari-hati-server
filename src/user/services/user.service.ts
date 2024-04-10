@@ -11,16 +11,24 @@ import { hash, verify } from 'argon2';
 import { S3Service } from 'src/common/s3/s3.service';
 import { randomUUID } from 'node:crypto';
 import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
+import { DataService } from 'src/data/data.service';
 import { FcmService } from 'src/common/firebase/fcm/fcm.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
-import { NotificationMessageDTO } from '../dtos/notification.dto';
+import { NotificationService } from 'src/notification/services/notification.service';
+import { MatchService } from '../features/match/match.service';
+import { PassionDTO } from 'src/data/dtos/passion.dto';
+import { PostgresService } from 'src/common/database/postgres/postgres.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private mongoService: MongoService,
         private s3Service: S3Service,
+        private dataService: DataService,
         private fcmSevice: FcmService,
+        private notificationService: NotificationService,
+        private matchService: MatchService,
+        private postgresService: PostgresService,
     ) {}
 
     async findOneById(id: string) {
@@ -261,36 +269,159 @@ export class UserService {
         }
     }
 
-    async sendNotificationTouUser(
+    async getUserNotifications(
         userId: string,
-        notificationMessage: NotificationMessageDTO,
+        limit?: number,
+        offset?: number,
     ) {
         try {
-            const loginSession =
-                await this.mongoService.loginSession.findUnique({
-                    where: {
-                        userId: userId,
-                    },
-                    select: {
-                        data: {
-                            select: {
-                                fcmToken: true,
-                            },
-                        },
-                    },
-                });
-
-            if (!loginSession) {
-                throw new BadRequestException('User not found');
-            }
-
-            const fcmTokens = loginSession.data.map((val) => val.fcmToken);
-            await this.fcmSevice.sendMessageToMultipleDevices({
-                tokens: fcmTokens,
-                ...notificationMessage,
-            });
+            return await this.notificationService.getUserNotifications(
+                userId,
+                limit,
+                offset,
+            );
         } catch (error) {
             throw new BadRequestException(error);
+        }
+    }
+
+    async updateNotificationReadAt(userId: string, notificationId: string) {
+        return await this.notificationService.updateNotificationReadAt(
+            userId,
+            notificationId,
+        );
+    }
+
+    async updateUserPassions(userId: string, data: PassionDTO[]) {
+        try {
+            data = [...new Set(data)];
+            if (data.length !== 5) {
+                throw new BadRequestException('Passions should be 5');
+            }
+            const passions = await this.dataService.getPassionsByIds(data);
+            if (passions.length !== 5) {
+                throw new BadRequestException('Passions not found');
+            }
+            const matchClass =
+                await this.matchService.calculateUserMatchClass(passions);
+            const user = await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    passions: {
+                        set: passions.map((val) => {
+                            return {
+                                name: val.name,
+                                createdAt: new Date(),
+                            };
+                        }),
+                    },
+                    matchClass: matchClass,
+                },
+                select: {
+                    passions: true,
+                },
+            });
+            return user.passions;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async getUserPassions(userId: string) {
+        try {
+            const user = await this.mongoService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                select: {
+                    passions: true,
+                },
+            });
+            return user.passions;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async getUnreadNotificationCount(userId: string) {
+        return await this.notificationService.getUnreadNotificationCount(
+            userId,
+        );
+    }
+
+    async getUserCoins(userId: string) {
+        try {
+            const user = await this.mongoService.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                select: {
+                    coinAmount: true,
+                },
+            });
+            return user.coinAmount;
+        } catch (error) {
+            throw new BadRequestException('Failed to get user coins');
+        }
+    }
+
+    async updateUserCoins(userId: string, coinAmount: number) {
+        try {
+            return await this.mongoService.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    coinAmount: {
+                        increment: coinAmount,
+                    },
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException('Failed to update user coins');
+        }
+    }
+
+    async getUserGiftTransactions(userId: string, type?: 'sent' | 'received') {
+        try {
+            const user = await this.findOneById(userId);
+            if (!user) {
+                throw new Error('User not exist');
+            }
+            const queryParam = {
+                OR: [
+                    {
+                        senderAccountId: userId,
+                    },
+                    {
+                        receiverAccountId: userId,
+                    },
+                ],
+            };
+            if (type) {
+                if (type === 'sent') {
+                    queryParam.OR = [
+                        {
+                            senderAccountId: userId,
+                        },
+                    ];
+                } else {
+                    queryParam.OR = [
+                        {
+                            receiverAccountId: userId,
+                        },
+                    ];
+                }
+            }
+            const transactions =
+                await this.postgresService.giftTransaction.findMany({
+                    where: queryParam,
+                });
+            return transactions;
+        } catch (error) {
+            throw new Error('Error while fetching gift transactions');
         }
     }
 
