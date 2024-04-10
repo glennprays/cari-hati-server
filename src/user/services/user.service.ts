@@ -13,6 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { compressAndConvertToJPEG, resizeImage } from 'src/utils/image.util';
 import { FcmService } from 'src/common/firebase/fcm/fcm.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,7 @@ export class UserService {
         private mongoService: MongoService,
         private s3Service: S3Service,
         private fcmSevice: FcmService,
+        private notificationService: NotificationService,
     ) {}
 
     async findOneById(id: string) {
@@ -255,6 +257,22 @@ export class UserService {
             });
             await this.s3Service.deleteAObject(user.photoProfile.path);
             return { message: 'Photo profile deleted' };
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async getUserNotifications(
+        userId: string,
+        limit?: number,
+        offset?: number,
+    ) {
+        try {
+            return await this.notificationService.getUserNotifications(
+                userId,
+                limit,
+                offset,
+            );
         } catch (error) {
             throw new BadRequestException(error);
         }

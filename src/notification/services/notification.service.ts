@@ -59,4 +59,25 @@ export class NotificationService {
             throw new BadRequestException(error);
         }
     }
+
+    async getUserNotifications(
+        userId: string,
+        limit: number = 20,
+        offset: number = 0,
+    ) {
+        try {
+            return await this.mongoService.notification.findMany({
+                where: {
+                    userId: userId,
+                },
+                take: limit | 20,
+                skip: offset | 0,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
 }
