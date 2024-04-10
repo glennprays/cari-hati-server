@@ -11,6 +11,7 @@ import { PostgresService } from 'src/common/database/postgres/postgres.service';
 import { Cron } from '@nestjs/schedule';
 import { MailService } from 'src/common/mail/mail.service';
 import { NotificationService } from 'src/notification/services/notification.service';
+import { MongoService } from 'src/common/database/mongo/mongo.service';
 
 @Injectable()
 export class CoinService {
@@ -20,6 +21,7 @@ export class CoinService {
         private postgresService: PostgresService,
         private mailService: MailService,
         private notificationService: NotificationService,
+        private mongoService: MongoService,
     ) {}
 
     async topupCoin({ bankCode, coinAmount }: TopupRequestDTO, userId: string) {
