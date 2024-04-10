@@ -40,18 +40,18 @@ model CoinTransactionType {
 }
 
 model CoinPackage {
-  id          String    @id @default(uuid()) @map("coin_package_id") @db.Uuid
-  coinAmount  BigInt
-  price       Float
-  
-  @@map("coin_package")
-  @@unique([coinAmount, price])
+    id         String @id @default(uuid()) @map("coin_package_id") @db.Uuid
+    coinAmount BigInt
+    price      Float
+
+    @@unique([coinAmount, price])
+    @@map("coin_package")
 }
 
 model GiftItem {
     id               String            @id(map: "PK_a3b4eab5e05d492765890d29064") @default(uuid()) @map("gift_item_id") @db.Uuid
-    name             String            @db.VarChar
-    coinAmount       BigInt            @map("coin_amount")
+    name             String            @unique @db.VarChar
+    coinAmount       Int               @map("coin_amount")
     imagePath        String            @map("image_path") @db.VarChar
     createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
     giftTransactions GiftTransaction[] @relation("GiftTransaction")

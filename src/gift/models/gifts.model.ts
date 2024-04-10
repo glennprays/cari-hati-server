@@ -4,9 +4,9 @@ import {
 } from 'prisma/postgres/generated/client';
 
 export class GiftItem implements GiftItemModel {
+    coinAmount: number;
     id: string;
     name: string;
-    coinAmount: bigint;
     imagePath: string;
     createdAt: Date;
 }
