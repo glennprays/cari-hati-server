@@ -57,7 +57,7 @@ export class MatchController {
     ) {
         return this.matchService.unmatchWithUser(
             req.user.sub.id,
-            userUnmatchtMatchDTO.receiverId,
+            userUnmatchtMatchDTO.target,
         );
     }
 
