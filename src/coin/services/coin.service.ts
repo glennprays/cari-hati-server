@@ -6,8 +6,15 @@ import {
 } from 'src/common/xendit/xendit-client';
 import { XenditService } from 'src/common/xendit/xendit.service';
 import { UserService } from 'src/user/services/user.service';
-import { SimulatePaymentDTO, TopupRequestDTO } from '../dtos/payment.dto';
+import {
+    SimulatePaymentDTO,
+    TopupRequestDTO,
+    WithdrawRequestDTO,
+} from '../dtos/payment.dto';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
+import { Cron } from '@nestjs/schedule';
+import { MailService } from 'src/common/mail/mail.service';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 
 @Injectable()
@@ -16,16 +23,26 @@ export class CoinService {
         private xenditService: XenditService,
         private userService: UserService,
         private postgresService: PostgresService,
+        private mailService: MailService,
+        private notificationService: NotificationService,
     ) {}
 
-    async topupCoin({ bankCode, coinAmount }: TopupRequestDTO, userId: string) {
+    async topupCoin(
+        { bankCode, coinPackageId }: TopupRequestDTO,
+        userId: string,
+    ) {
         const customer = await this.userService.findOneById(userId);
         if (!customer) {
             throw new BadRequestException('User not found');
         }
-
-        // TODO: calculate moneyAmount based on price in database/coin package
-        const moneyAmount = coinAmount * 100;
+        const coinPackage = await this.postgresService.coinPackage.findUnique({
+            where: {
+                id: coinPackageId,
+            },
+        });
+        if (!coinPackage) {
+            throw new BadRequestException('Invalid coin package');
+        }
 
         const topupType =
             await this.postgresService.coinTransactionType.findFirst({
@@ -34,9 +51,11 @@ export class CoinService {
                 },
             });
 
-        const transactionFee = (moneyAmount * topupType.feePercentage) / 100;
+        const transactionFee =
+            (coinPackage.price * topupType.feePercentage) / 100;
+        const totalAmount = coinPackage.price + transactionFee;
 
-        const referenceId = `tu-${new Date().toISOString()}-${randomUUID()}`;
+        const referenceId = `tu-${Date.now()}-${randomUUID()}`;
         const expirationDate = new Date(
             new Date().getTime() + 2 * 60 * 60 * 1000,
         ).toISOString();
@@ -46,7 +65,7 @@ export class CoinService {
                 external_id: referenceId,
                 bank_code: bankCode,
                 name: customer.name,
-                expected_amount: moneyAmount + transactionFee,
+                expected_amount: totalAmount,
                 expiration_date: expirationDate,
                 is_single_use: true,
                 is_closed: true,
@@ -54,13 +73,12 @@ export class CoinService {
         if (!payment) {
             throw new BadRequestException('Failed to create payment');
         }
-
         return await this.postgresService.coinTransaction.create({
             data: {
                 id: referenceId,
                 userAccountId: userId,
-                coinAmount: coinAmount,
-                moneyAmount: moneyAmount,
+                coinAmount: coinPackage.coinAmount,
+                moneyAmount: coinPackage.price,
                 transactionFee: transactionFee,
                 status: 'waiting',
                 bankCode: payment.bank_code,
@@ -69,6 +87,41 @@ export class CoinService {
                 expiresAt: payment.expiration_date,
             },
         });
+    }
+
+    async withdrawCoin(userId: string, { coinAmount }: WithdrawRequestDTO) {
+        try {
+            const user = await this.userService.findOneById(userId);
+            if (!user) {
+                throw new BadRequestException('User not found');
+            }
+            if (user.coinAmount < coinAmount) {
+                throw new BadRequestException('Insufficient coins');
+            }
+            const withdrawType =
+                await this.postgresService.coinTransactionType.findFirst({
+                    where: {
+                        name: 'withdraw',
+                    },
+                });
+            const convertCoinToMoney = coinAmount * 300;
+            const transactionFee =
+                (convertCoinToMoney * withdrawType.feePercentage) / 100;
+            await this.userService.updateUserCoins(userId, -coinAmount);
+            return await this.postgresService.coinTransaction.create({
+                data: {
+                    id: `wd-${Date.now()}-${randomUUID()}`,
+                    userAccountId: userId,
+                    coinAmount: coinAmount,
+                    moneyAmount: convertCoinToMoney,
+                    transactionFee: transactionFee,
+                    status: 'success',
+                    transactionTypeId: withdrawType.id,
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
     }
 
     async updateTransactionStatus(
@@ -93,16 +146,90 @@ export class CoinService {
                         status: 'success',
                         webhookId: webhookId,
                         webhookCreated: response.created,
+                        updatedAt: new Date(),
+                    },
+                    select: {
+                        id: true,
+                        user: {
+                            select: {
+                                id: true,
+                                email: true,
+                            },
+                        },
+                        moneyAmount: true,
+                        transactionFee: true,
+                        coinAmount: true,
+                        bankAccountNumber: true,
+                        bankCode: true,
+                        updatedAt: true,
                     },
                 });
             if (!transaction) {
                 throw new BadRequestException('Transaction is not valid');
             }
+            await this.userService.updateUserCoins(
+                transaction.user.id,
+                transaction.coinAmount,
+            );
+            this.mailService.sendTransactionSuccess(transaction.user.email, {
+                price: transaction.moneyAmount,
+                transactionFee: transaction.transactionFee,
+                coinAmount: transaction.coinAmount,
+                bank: transaction.bankCode,
+                virtualAccountNumber: transaction.bankAccountNumber,
+                date: transaction.updatedAt.toISOString(),
+            });
+            const targetPath = `/transactions/${transaction.id}`;
+            this.notificationService.sendNotificationToUser(
+                transaction.user.id,
+                'transaction',
+                {
+                    notification: {
+                        title: 'Topup Success',
+                        body: `Your topup with amount ${transaction.coinAmount} coins has been success`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
             return transaction;
         } catch (error) {
             console.log(error);
             throw new BadRequestException(error.message);
         }
+    }
+
+    @Cron('* * * * *')
+    async updateExpiredTransactions() {
+        const expiredTransactions =
+            await this.postgresService.coinTransaction.findMany({
+                where: {
+                    status: 'waiting',
+                    expiresAt: {
+                        lte: new Date(),
+                    },
+                },
+            });
+        await this.postgresService.coinTransaction.updateMany({
+            where: {
+                id: {
+                    in: expiredTransactions.map(
+                        (transaction) => transaction.id,
+                    ),
+                },
+            },
+            data: {
+                status: 'failed',
+            },
+        });
+        console.log(
+            'Cron job: Update expired transaction:',
+            expiredTransactions.length,
+        );
     }
 
     async simulateTransaction(
@@ -111,7 +238,7 @@ export class CoinService {
     ) {
         try {
             const transaction =
-                await this.postgresService.coinTransaction.findFirst({
+                await this.postgresService.coinTransaction.findUnique({
                     where: {
                         userAccountId: userId,
                         bankCode: bankCode,
@@ -138,5 +265,16 @@ export class CoinService {
                 error.message,
             );
         }
+    }
+
+    async getCoinPackages() {
+        try {
+            const packages = await this.postgresService.coinPackage.findMany({
+                orderBy: {
+                    coinAmount: 'asc',
+                },
+            });
+            return packages;
+        } catch (error) {}
     }
 }

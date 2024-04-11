@@ -8,6 +8,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { MailModule } from 'src/common/mail/mail.module';
 import { RedisModule } from 'src/common/database/redis/redis.module';
 import { WebsocketExceptionsFilter } from './filters/ws.exception';
+import { AuthController } from './auth.controller';
 
 @Module({
     providers: [
@@ -27,5 +28,6 @@ import { WebsocketExceptionsFilter } from './filters/ws.exception';
             signOptions: { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION },
         }),
     ],
+    controllers: [AuthController],
 })
 export class AuthModule {}

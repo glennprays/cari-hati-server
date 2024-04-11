@@ -7,11 +7,14 @@ import { DatabaseModule } from 'src/common/database/database.module';
 import { UserService } from './services/user.service';
 import { UserController } from './user.controller';
 import { S3Module } from 'src/common/s3/s3.module';
+import { PassionService } from './services/passion.service';
 import { RouterModule } from '@nestjs/core';
 import { FirebaseModule } from 'src/common/firebase/firebase.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { DataModule } from 'src/data/data.module';
 
 @Module({
-    providers: [PersonService, UserService],
+    providers: [PersonService, UserService, PassionService],
     exports: [PersonService, UserService],
     imports: [
         MatchModule,
@@ -32,6 +35,8 @@ import { FirebaseModule } from 'src/common/firebase/firebase.module';
             },
         ]),
         FirebaseModule,
+        NotificationModule,
+        DataModule,
     ],
     controllers: [UserController],
 })

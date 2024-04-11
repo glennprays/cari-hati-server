@@ -1,7 +1,18 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Post,
+    Request,
+    UseGuards,
+} from '@nestjs/common';
 import { CoinService } from './services/coin.service';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { SimulatePaymentDTO, TopupRequestDTO } from './dtos/payment.dto';
+import {
+    SimulatePaymentDTO,
+    TopupRequestDTO,
+    WithdrawRequestDTO,
+} from './dtos/payment.dto';
 import { plainToInstance } from 'class-transformer';
 import { WebhookResponse } from 'src/common/xendit/xendit-client';
 
@@ -9,13 +20,20 @@ import { WebhookResponse } from 'src/common/xendit/xendit-client';
 export class CoinController {
     constructor(private coinService: CoinService) {}
 
-    // UNCOMPLETE: this is not complete function, it just use for payment gateway testing
     @UseGuards(JwtGuard)
     @Post('topup')
     async topUpCoin(@Request() req, @Body() data: TopupRequestDTO) {
         data = plainToInstance(TopupRequestDTO, data);
 
         return this.coinService.topupCoin(data, req.user.sub.id);
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('withdraw')
+    async withdrawCoin(@Request() req, @Body() data: WithdrawRequestDTO) {
+        data = plainToInstance(WithdrawRequestDTO, data);
+
+        return this.coinService.withdrawCoin(req.user.sub.id, data);
     }
 
     @Post('callback')
@@ -36,5 +54,11 @@ export class CoinController {
             data,
             req.user.sub.id,
         );
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('packages')
+    async getCoinPackages() {
+        return await this.coinService.getCoinPackages();
     }
 }
