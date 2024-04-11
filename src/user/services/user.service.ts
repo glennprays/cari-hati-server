@@ -500,8 +500,11 @@ export class UserService {
         }
     }
 
-    async blockUser(userId: string, targetId: string): Promise<string | null> {
+    async blockUser(userId: string, targetId: string) {
         try {
+            if (userId === targetId) {
+                throw new BadRequestException('Cannot block self');
+            }
             const existingBlockedUser =
                 await this.mongoService.blocked.findFirst({
                     where: {
@@ -514,16 +517,41 @@ export class UserService {
                 throw new BadRequestException('User already blocked');
             }
 
-            await this.mongoService.blocked.create({
+            const userMatch = await this.mongoService.userMatch.findFirst({
+                where: {
+                    OR: [
+                        {
+                            senderId: userId,
+                            receiverId: targetId,
+                        },
+                        {
+                            senderId: targetId,
+                            receiverId: userId,
+                        },
+                    ],
+                },
+            });
+
+            if (!userMatch) {
+                throw new BadRequestException('User not matched');
+            }
+
+            await this.mongoService.userMatch.delete({
+                where: {
+                    id: userMatch.id,
+                },
+            });
+
+            return await this.mongoService.blocked.create({
                 data: {
                     blockerId: userId,
                     blockedId: targetId,
                     createdAt: new Date(),
                 },
             });
-            return 'User blocked successfully';
         } catch (error) {
-            throw new BadRequestException("Block Not Successfuly");
+            console.log(error);
+            throw new BadRequestException(error.message);
         }
     }
 }
