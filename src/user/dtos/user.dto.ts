@@ -41,3 +41,7 @@ export class UserUpdateStatusMatchDTO {
     id: string;
     state: MatchStatus;
 }
+
+export class UserBlockDTO {
+    target_id: string;
+}
