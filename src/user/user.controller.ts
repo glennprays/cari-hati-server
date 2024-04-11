@@ -125,10 +125,30 @@ export class UserController {
     async getUserGifts(
         @Request() req,
         @Query('type') type: 'sent' | 'received',
+        @Query('limit') limit: number,
+        @Query('offset') offset: number,
     ) {
         return await this.userService.getUserGiftTransactions(
             req.user.sub.id,
             type,
+            +limit,
+            +offset,
+        );
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('coins/transactions')
+    async getCoinTransactions(
+        @Request() req,
+        @Query('type') type: 'topup' | 'withdraw',
+        @Query('limit') limit: number,
+        @Query('offset') offset: number,
+    ) {
+        return this.userService.getUserCoinTransactions(
+            req.user.sub.id,
+            type,
+            limit,
+            offset,
         );
     }
 
