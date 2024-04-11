@@ -41,8 +41,6 @@ export class MatchController {
         @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
         @Request() req,
     ) {
-        console.log('masuk');
-
         return this.matchService.findAllMatchesByUserId(
             req.user.sub.id,
             userGetAllMatchDTO.accepted_only,
@@ -57,7 +55,7 @@ export class MatchController {
     ) {
         return this.matchService.unmatchWithUser(
             req.user.sub.id,
-            userUnmatchtMatchDTO.receiverId,
+            userUnmatchtMatchDTO.target,
         );
     }
 

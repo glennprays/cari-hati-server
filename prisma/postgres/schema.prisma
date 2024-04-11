@@ -15,9 +15,9 @@ model CoinTransaction {
     moneyAmount         Float                 @map("money_amount")
     transactionFee      Float                 @map("transaction_fee")
     status              CoinTransactionStatus @default(waiting)
-    bankCode            String                @map("bank_code")
-    bankAccountNumber   String                @unique @map("bank_account_number")
-    expiresAt           DateTime              @map("expires_at") @db.Timestamp(6)
+    bankCode            String?               @map("bank_code")
+    bankAccountNumber   String?               @unique @map("bank_account_number")
+    expiresAt           DateTime?             @map("expires_at") @db.Timestamp(6)
     createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
     updatedAt           DateTime              @default(now()) @map("updated_at") @db.Timestamp(6)
     webhookId           String?               @map("webhook_id")
@@ -41,7 +41,7 @@ model CoinTransactionType {
 
 model CoinPackage {
     id         String @id @default(uuid()) @map("coin_package_id") @db.Uuid
-    coinAmount BigInt
+    coinAmount Int    @map("coin_amount")
     price      Float
 
     @@unique([coinAmount, price])
