@@ -16,7 +16,6 @@ import { Cron } from '@nestjs/schedule';
 import { MailService } from 'src/common/mail/mail.service';
 import { NotificationService } from 'src/notification/services/notification.service';
 
-
 @Injectable()
 export class CoinService {
     constructor(
