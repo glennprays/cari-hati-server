@@ -465,6 +465,27 @@ export class UserService {
         }
     }
 
+    async getUserPaymentByBankAccountNumber(
+        userId: string,
+        bankAccountNumber: string,
+    ) {
+        try {
+            const payment =
+                await this.postgresService.coinTransaction.findUnique({
+                    where: {
+                        userAccountId: userId,
+                        bankAccountNumber: bankAccountNumber,
+                    },
+                });
+            if (!payment) {
+                throw new Error('Payment not found');
+            }
+            return payment;
+        } catch (error) {
+            throw new Error('Error while fetching payment');
+        }
+    }
+
     // DEBUG: this just for testing firebase messaging
     async testNotificationToUser(message: Message) {
         console.log(message);
