@@ -42,7 +42,7 @@ export async function structuralSeeder(
     Promise.all(coinTransactionTypes);
 
     const coinPackages = rawData.coinPackage.map((coinPackage) => ({
-        coinAmount: BigInt(coinPackage.coinAmount),
+        coinAmount: coinPackage.coinAmount,
         price: coinPackage.price,
     }));
     const createManyCoinPackages = coinPackages.map((coinPackage) =>
