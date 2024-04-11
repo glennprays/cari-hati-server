@@ -384,7 +384,12 @@ export class UserService {
         }
     }
 
-    async getUserGiftTransactions(userId: string, type?: 'sent' | 'received') {
+    async getUserGiftTransactions(
+        userId: string,
+        type?: 'sent' | 'received',
+        limit?: number,
+        offset?: number,
+    ) {
         try {
             const user = await this.findOneById(userId);
             if (!user) {
@@ -399,6 +404,11 @@ export class UserService {
                         receiverAccountId: userId,
                     },
                 ],
+            };
+            const param = {
+                where: queryParam,
+                take: limit | 20,
+                skip: offset | 0,
             };
             if (type) {
                 if (type === 'sent') {
@@ -416,12 +426,42 @@ export class UserService {
                 }
             }
             const transactions =
-                await this.postgresService.giftTransaction.findMany({
-                    where: queryParam,
-                });
+                await this.postgresService.giftTransaction.findMany(param);
             return transactions;
         } catch (error) {
             throw new Error('Error while fetching gift transactions');
+        }
+    }
+
+    async getUserCoinTransactions(
+        userId: string,
+        type?: 'topup' | 'withdraw',
+        limit?: number,
+        offset?: number,
+    ) {
+        try {
+            const user = await this.findOneById(userId);
+            if (!user) {
+                throw new Error('User not exist');
+            }
+            const queryParam: any = {
+                userAccountId: userId,
+            };
+            const param = {
+                where: queryParam,
+                take: limit | 20,
+                skip: offset | 0,
+            };
+            if (type) {
+                queryParam.coinTransactionType = {
+                    name: type,
+                };
+            }
+            const transactions =
+                await this.postgresService.coinTransaction.findMany(param);
+            return transactions;
+        } catch (error) {
+            throw new Error('Error while fetching coin transactions');
         }
     }
 
