@@ -499,4 +499,59 @@ export class UserService {
             throw new BadRequestException(error);
         }
     }
+
+    async blockUser(userId: string, targetId: string) {
+        try {
+            if (userId === targetId) {
+                throw new BadRequestException('Cannot block self');
+            }
+            const existingBlockedUser =
+                await this.mongoService.blocked.findFirst({
+                    where: {
+                        blockerId: userId,
+                        blockedId: targetId,
+                    },
+                });
+
+            if (existingBlockedUser) {
+                throw new BadRequestException('User already blocked');
+            }
+
+            const userMatch = await this.mongoService.userMatch.findFirst({
+                where: {
+                    OR: [
+                        {
+                            senderId: userId,
+                            receiverId: targetId,
+                        },
+                        {
+                            senderId: targetId,
+                            receiverId: userId,
+                        },
+                    ],
+                },
+            });
+
+            if (!userMatch) {
+                throw new BadRequestException('User not matched');
+            }
+
+            await this.mongoService.userMatch.delete({
+                where: {
+                    id: userMatch.id,
+                },
+            });
+
+            return await this.mongoService.blocked.create({
+                data: {
+                    blockerId: userId,
+                    blockedId: targetId,
+                    createdAt: new Date(),
+                },
+            });
+        } catch (error) {
+            console.log(error);
+            throw new BadRequestException(error.message);
+        }
+    }
 }

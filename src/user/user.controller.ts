@@ -14,7 +14,11 @@ import {
     Param,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserResposeDTO, UserUpdateDTO } from 'src/user/dtos/user.dto';
+import {
+    UserBlockDTO,
+    UserResposeDTO,
+    UserUpdateDTO,
+} from 'src/user/dtos/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './services/user.service';
 import { Message } from 'firebase-admin/lib/messaging/messaging-api';
@@ -168,5 +172,15 @@ export class UserController {
     @Post('notification')
     async testNotificationToUser(@Body() message: Message) {
         return await this.userService.testNotificationToUser(message);
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('block')
+    async userBlock(@Body() data: UserBlockDTO, @Request() req) {
+        const user = await this.userService.blockUser(
+            req.user.sub.id,
+            data.target_id,
+        );
+        return user;
     }
 }
