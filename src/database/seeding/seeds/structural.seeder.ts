@@ -10,6 +10,10 @@ import { DefaultArgs } from '@prisma/client/runtime/library';
 import * as rawData from './raw/structural.json';
 import { PassionFactory } from '../../factories/passion.factory';
 
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 export async function structuralSeeder(
     mongo: MongoClient<PrismaMongo.PrismaClientOptions, never, DefaultArgs>,
     postgres: PostgresClient<
@@ -37,22 +41,40 @@ export async function structuralSeeder(
     );
     Promise.all(coinTransactionTypes);
 
-    const coinPackages = rawData.coinPackage.map(coinPackage => ({
-        coinAmount: BigInt(coinPackage.coinAmount), 
-        price: coinPackage.price
+    const coinPackages = rawData.coinPackage.map((coinPackage) => ({
+        coinAmount: coinPackage.coinAmount,
+        price: coinPackage.price,
     }));
     const createManyCoinPackages = coinPackages.map((coinPackage) =>
         postgres.coinPackage.upsert({
-            where: { 
+            where: {
                 coinAmount_price: {
                     coinAmount: coinPackage.coinAmount,
-                    price: coinPackage.price
-                }
+                    price: coinPackage.price,
+                },
             },
             update: {},
             create: coinPackage,
         }),
     );
-    
+
     await Promise.all(createManyCoinPackages);
+
+    const objectUrl = process.env.S3_BUCKET_URL;
+
+    const createManyGiftItems = rawData.giftItems.map((giftItem) =>
+        postgres.giftItem.upsert({
+            where: {
+                name: giftItem.name,
+            },
+            update: {},
+            create: {
+                name: giftItem.name,
+                coinAmount: giftItem.amount,
+                imagePath: `${objectUrl}/data/${giftItem.image}`,
+            },
+        }),
+    );
+
+    await Promise.all(createManyGiftItems);
 }

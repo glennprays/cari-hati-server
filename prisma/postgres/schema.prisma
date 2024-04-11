@@ -15,9 +15,9 @@ model CoinTransaction {
     moneyAmount         Float                 @map("money_amount")
     transactionFee      Float                 @map("transaction_fee")
     status              CoinTransactionStatus @default(waiting)
-    bankCode            String                @map("bank_code")
-    bankAccountNumber   String                @unique @map("bank_account_number")
-    expiresAt           DateTime              @map("expires_at") @db.Timestamp(6)
+    bankCode            String?               @map("bank_code")
+    bankAccountNumber   String?               @unique @map("bank_account_number")
+    expiresAt           DateTime?             @map("expires_at") @db.Timestamp(6)
     createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
     updatedAt           DateTime              @default(now()) @map("updated_at") @db.Timestamp(6)
     webhookId           String?               @map("webhook_id")
@@ -40,18 +40,18 @@ model CoinTransactionType {
 }
 
 model CoinPackage {
-  id          String    @id @default(uuid()) @map("coin_package_id") @db.Uuid
-  coinAmount  BigInt
-  price       Float
-  
-  @@map("coin_package")
-  @@unique([coinAmount, price])
+    id         String @id @default(uuid()) @map("coin_package_id") @db.Uuid
+    coinAmount Int    @map("coin_amount")
+    price      Float
+
+    @@unique([coinAmount, price])
+    @@map("coin_package")
 }
 
 model GiftItem {
     id               String            @id(map: "PK_a3b4eab5e05d492765890d29064") @default(uuid()) @map("gift_item_id") @db.Uuid
-    name             String            @db.VarChar
-    coinAmount       BigInt            @map("coin_amount")
+    name             String            @unique @db.VarChar
+    coinAmount       Int               @map("coin_amount")
     imagePath        String            @map("image_path") @db.VarChar
     createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
     giftTransactions GiftTransaction[] @relation("GiftTransaction")
@@ -63,7 +63,7 @@ model GiftTransaction {
     id                String   @id(map: "PK_e6c3ccf00cb4185681ab6e83ee3") @default(uuid()) @map("gift_transaction_id") @db.Uuid
     senderAccountId   String   @map("sender_account_id") @db.Uuid
     receiverAccountId String   @map("receiver_account_id") @db.Uuid
-    coinAmount        BigInt   @map("coin_amount")
+    coinAmount        Int      @map("coin_amount")
     createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp(6)
     giftItemId        String   @map("gift_item_id") @db.Uuid
     giftItem          GiftItem @relation("GiftTransaction", fields: [giftItemId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_6fb26f046492292cbafe3157c55")

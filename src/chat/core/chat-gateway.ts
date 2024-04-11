@@ -20,6 +20,7 @@ import { RoomService } from './room.service';
 import { WebsocketExceptionsFilter } from 'src/auth/filters/ws.exception';
 import { MessageService } from './message.service.ts';
 import { Message } from '../models/message.interface';
+import { GiftService } from 'src/gift/gift.service';
 
 @WebSocketGateway()
 @UseGuards(WsJwtGuard)
@@ -34,6 +35,7 @@ export class ChatGateway
     constructor(
         private readonly roomService: RoomService,
         private readonly messageService: MessageService,
+        private readonly giftService: GiftService,
     ) {}
 
     afterInit() {
@@ -96,7 +98,7 @@ export class ChatGateway
     @SubscribeMessage('message')
     async handleMessage(
         @ConnectedSocket() client: Socket,
-        @MessageBody() data: { room: string; message: string },
+        @MessageBody() data: { room: string; text: string },
     ) {
         if (data.room) {
             const isClientInRoom = await this.roomService.isClientInRoom(
@@ -109,7 +111,7 @@ export class ChatGateway
             const user = (client.handshake as any).user;
             const message = await this.messageService.addMessage(
                 data.room,
-                { text: data.message } as Message,
+                { text: data.text } as Message,
                 user.sub.id,
             );
             this.server.to(data.room).emit('message', {
@@ -133,6 +135,40 @@ export class ChatGateway
                 message: 'User left',
                 user: user.username,
                 users,
+            });
+        }
+    }
+
+    @SubscribeMessage('gift')
+    async handleGift(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { room: string; giftId: string },
+    ) {
+        if (data.room) {
+            const isClientInRoom = await this.roomService.isClientInRoom(
+                data.room,
+                client.id,
+            );
+            if (!isClientInRoom) {
+                throw new UnauthorizedException('User not in room');
+            }
+
+            const user = (client.handshake as any).user;
+
+            const giftTransaction = await this.giftService.sendGift(
+                user.sub.id,
+                data.room,
+                data.giftId,
+            );
+
+            const message = await this.messageService.addMessage(
+                data.room,
+                { gift: giftTransaction.giftItem.imagePath } as Message,
+                user.sub.id,
+            );
+            this.server.to(data.room).emit('message', {
+                message,
+                user: user.username,
             });
         }
     }

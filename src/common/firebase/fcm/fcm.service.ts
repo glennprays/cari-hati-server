@@ -5,7 +5,10 @@ import {
     BadGatewayException,
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { Message } from 'firebase-admin/lib/messaging/messaging-api';
+import {
+    Message,
+    MulticastMessage,
+} from 'firebase-admin/lib/messaging/messaging-api';
 
 @Injectable()
 export class FcmService implements OnModuleInit {
@@ -37,6 +40,16 @@ export class FcmService implements OnModuleInit {
                     throw new BadGatewayException(err);
                 });
             return reponse;
+        } catch (error) {
+            throw new BadGatewayException(error);
+        }
+    }
+
+    async sendMessageToMultipleDevices(multicashMessage: MulticastMessage) {
+        try {
+            await this.firebaseAdmin
+                .messaging()
+                .sendEachForMulticast(multicashMessage);
         } catch (error) {
             throw new BadGatewayException(error);
         }
