@@ -30,7 +30,7 @@ export class UserRequestMatchDTO {
 }
 
 export class UserUnmatchMatchDTO {
-    receiverId: string;
+    target: string;
 }
 
 export class UserGetAllMatchDTO {
@@ -40,4 +40,8 @@ export class UserGetAllMatchDTO {
 export class UserUpdateStatusMatchDTO {
     id: string;
     state: MatchStatus;
+}
+
+export class UserBlockDTO {
+    target_id: string;
 }

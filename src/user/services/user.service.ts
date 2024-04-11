@@ -384,7 +384,12 @@ export class UserService {
         }
     }
 
-    async getUserGiftTransactions(userId: string, type?: 'sent' | 'received') {
+    async getUserGiftTransactions(
+        userId: string,
+        type?: 'sent' | 'received',
+        limit?: number,
+        offset?: number,
+    ) {
         try {
             const user = await this.findOneById(userId);
             if (!user) {
@@ -399,6 +404,11 @@ export class UserService {
                         receiverAccountId: userId,
                     },
                 ],
+            };
+            const param = {
+                where: queryParam,
+                take: limit | 20,
+                skip: offset | 0,
             };
             if (type) {
                 if (type === 'sent') {
@@ -416,12 +426,63 @@ export class UserService {
                 }
             }
             const transactions =
-                await this.postgresService.giftTransaction.findMany({
-                    where: queryParam,
-                });
+                await this.postgresService.giftTransaction.findMany(param);
             return transactions;
         } catch (error) {
             throw new Error('Error while fetching gift transactions');
+        }
+    }
+
+    async getUserCoinTransactions(
+        userId: string,
+        type?: 'topup' | 'withdraw',
+        limit?: number,
+        offset?: number,
+    ) {
+        try {
+            const user = await this.findOneById(userId);
+            if (!user) {
+                throw new Error('User not exist');
+            }
+            const queryParam: any = {
+                userAccountId: userId,
+            };
+            const param = {
+                where: queryParam,
+                take: limit | 20,
+                skip: offset | 0,
+            };
+            if (type) {
+                queryParam.coinTransactionType = {
+                    name: type,
+                };
+            }
+            const transactions =
+                await this.postgresService.coinTransaction.findMany(param);
+            return transactions;
+        } catch (error) {
+            throw new Error('Error while fetching coin transactions');
+        }
+    }
+
+    async getUserPaymentByBankAccountNumber(
+        userId: string,
+        bankAccountNumber: string,
+    ) {
+        try {
+            const payment =
+                await this.postgresService.coinTransaction.findUnique({
+                    where: {
+                        userAccountId: userId,
+                        bankAccountNumber: bankAccountNumber,
+                    },
+                });
+            if (!payment) {
+                throw new Error('Payment not found');
+            }
+            return payment;
+        } catch (error) {
+            throw new Error('Error while fetching payment');
         }
     }
 
@@ -436,6 +497,61 @@ export class UserService {
             return notificationId;
         } catch (error) {
             throw new BadRequestException(error);
+        }
+    }
+
+    async blockUser(userId: string, targetId: string) {
+        try {
+            if (userId === targetId) {
+                throw new BadRequestException('Cannot block self');
+            }
+            const existingBlockedUser =
+                await this.mongoService.blocked.findFirst({
+                    where: {
+                        blockerId: userId,
+                        blockedId: targetId,
+                    },
+                });
+
+            if (existingBlockedUser) {
+                throw new BadRequestException('User already blocked');
+            }
+
+            const userMatch = await this.mongoService.userMatch.findFirst({
+                where: {
+                    OR: [
+                        {
+                            senderId: userId,
+                            receiverId: targetId,
+                        },
+                        {
+                            senderId: targetId,
+                            receiverId: userId,
+                        },
+                    ],
+                },
+            });
+
+            if (!userMatch) {
+                throw new BadRequestException('User not matched');
+            }
+
+            await this.mongoService.userMatch.delete({
+                where: {
+                    id: userMatch.id,
+                },
+            });
+
+            return await this.mongoService.blocked.create({
+                data: {
+                    blockerId: userId,
+                    blockedId: targetId,
+                    createdAt: new Date(),
+                },
+            });
+        } catch (error) {
+            console.log(error);
+            throw new BadRequestException(error.message);
         }
     }
 }
