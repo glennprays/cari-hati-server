@@ -152,6 +152,18 @@ export class UserController {
         );
     }
 
+    @UseGuards(JwtGuard)
+    @Get('payments')
+    async createPayment(
+        @Request() req,
+        @Query('bank_account_number') bankAccountNumber: string,
+    ) {
+        return this.userService.getUserPaymentByBankAccountNumber(
+            req.user.sub.id,
+            bankAccountNumber,
+        );
+    }
+
     // DEBUG: this just for testing firebase messaging
     @Post('notification')
     async testNotificationToUser(@Body() message: Message) {
