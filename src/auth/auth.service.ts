@@ -12,6 +12,8 @@ import { PersonTokenPayload } from './models/payload.model';
 import { MailService } from 'src/common/mail/mail.service';
 import { RedisService } from 'src/common/database/redis/redis.service';
 import { UserService } from 'src/user/services/user.service';
+import { generateHash } from 'src/utils/hash.util';
+import { RedisKeyFactory } from 'src/common/database/redis/factory/key.factory';
 
 @Injectable()
 export class AuthService {
@@ -203,5 +205,43 @@ export class AuthService {
             return await this.generateTokens(person);
         }
         return person;
+    }
+
+    async resetPasswordRequest(email: string) {
+        const person = await this.personService.findOneByEmail(email);
+        if (!person) {
+            throw new BadRequestException('Account does not exist');
+        }
+        const key = RedisKeyFactory.resetPasswordKey(email);
+        const isExist = await this.redisService.redisClient.exists(key);
+        if (isExist) {
+            throw new BadRequestException('Reset url already sent');
+        }
+        const hash = generateHash();
+        const resetUrl = `${process.env.RESET_PASSWORD_URL}/${hash}`;
+        const status = await this.redisService.redisClient.set(
+            key,
+            hash,
+            'EX',
+            60 * 2,
+        );
+        if (status) {
+            this.mailService.sendResetPassword(email, resetUrl);
+            return { message: 'Reset url sent' };
+        }
+    }
+
+    async resetPassword(email: string, hash: string, password: string) {
+        const key = RedisKeyFactory.resetPasswordKey(email);
+        const existingHash = await this.redisService.redisClient.get(key);
+        if (!existingHash) {
+            throw new BadRequestException('Reset hash not found');
+        }
+        if (existingHash !== hash) {
+            throw new BadRequestException('Invalid reset url');
+        }
+        await this.personService.resetPassword(email, password);
+        await this.redisService.redisClient.del(key);
+        return { message: 'Password reset success' };
     }
 }
