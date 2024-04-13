@@ -99,4 +99,13 @@ export class PersonService {
         delete person.password;
         return person;
     }
+
+    async resetPassword(email: string, password: string) {
+        const person = await this.findOneByEmail(email);
+        if (!person) {
+            throw new BadRequestException('Email not found');
+        }
+        await this.updatePerson({ personId: person.id, password: password });
+        return password;
+    }
 }
