@@ -18,4 +18,8 @@ export class RedisKeyFactory {
     static decodeChatRoomKey(key: string) {
         return key.replace('Room:', '');
     }
+
+    static resetPasswordKey(email: string) {
+        return `reset_password_${email}`;
+    }
 }
