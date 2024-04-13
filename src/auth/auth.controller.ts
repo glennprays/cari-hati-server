@@ -7,6 +7,7 @@ import {
     Request,
     UseGuards,
     Res,
+    Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -16,6 +17,7 @@ import { JwtGuard } from './guards/jwt-auth.guard';
 import { PersonDTO } from 'src/user/dtos/person.dto';
 import { tokenExtractorFromCookies } from './strategies/jwt-refresh.strategy';
 import { plainToInstance } from 'class-transformer';
+import { AuthDTO } from './dtos/email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -93,5 +95,19 @@ export class AuthController {
     @Get('account')
     async getProfile(@Request() req) {
         return this.personService.findPersonByEmail(req.user);
+    }
+
+    @Post('account/password/reset')
+    async resetPasswordRequest(@Body() data: { email: string }) {
+        return await this.authService.resetPasswordRequest(data.email);
+    }
+
+    @Patch('account/password/:hash')
+    async resetPassword(@Param('hash') hash: string, @Body() data: AuthDTO) {
+        return await this.authService.resetPassword(
+            data.email,
+            hash,
+            data.password,
+        );
     }
 }
