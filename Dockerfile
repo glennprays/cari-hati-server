@@ -15,4 +15,4 @@ COPY .env ./
 COPY .env.local ./
 EXPOSE 3000 
 
-CMD ["npm", "run", "prisma:push", "&&", "npm", "run", "seed:structural", "&&", "npm", "run", "start:prod"]
+CMD sh -c "npm run prisma:push && npm run seed:structural && npm run start:prod"
