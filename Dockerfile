@@ -2,9 +2,9 @@ FROM node:16-alpine as builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --production
+COPY . .
 RUN npm run prisma:push
 RUN npm run seed:structural
-COPY . .
 RUN npm run build
 
 FROM node:16-alpine as production
