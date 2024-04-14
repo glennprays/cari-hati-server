@@ -1,0 +1,26 @@
+name: Pull Image
+
+on:
+    workflow_run:
+        workflows: ['Build Image CI']
+        types:
+            - completed
+
+jobs:
+    build:
+        runs-on: self-hosted
+
+        env:
+            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+            DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
+
+        steps:
+            - name: Pull Docker image
+              run: sudo docker pull "${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
+
+            - name: Delete Old Docker container
+              run: sudo docker rm -f "${DOCKER_IMAGE}-container" || true
+
+            - name: Run Docker Container
+              run: docker run -d --name "${DOCKER_IMAGE}-container" --network ch-network "${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
