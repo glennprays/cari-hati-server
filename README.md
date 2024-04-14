@@ -21,14 +21,28 @@ You have to get AWS access and secret key also S3 bucket config. You can check i
 
 ### Xendit Account
 
+### Firebase Account
+
 ### ENV File
 
--   `.env`: This is main env file, you have to create the file base on `.env.template` before run in production
+-   `.env`: This is main env file, you have to create the file base on `.env.example` before run in production
 -   `.env.local`: This file used for development and production, please create the file base on `.env.local.example` before run
 
 ### CREDENTIALS
 
--   `firebase private key`: generate your firebase private by follow [this](https://firebase.google.com/docs/admin/setup?authuser=1#initialize_the_sdk_in_non-google_environments), and store your private key at `./src/common/firebase/credentials/service-account-file.json`
+-   `firebase private key`: generate your firebase private by follow [this](https://firebase.google.com/docs/admin/setup?authuser=1#initialize_the_sdk_in_non-google_environments), then store private key into `FIREBASE_PRIVATE_KEY`, `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` in .env file
+-   Insert your email credentials in .env.local
+
+### Prisma
+
+Before started, you have to generate the prisma schema and push it into your database
+
+```bash
+# generate only
+$ npm run prisma:generate
+# generate and push schema to database
+$ npm run prisma:push
+```
 
 ### Development Mode
 
@@ -46,6 +60,15 @@ $ npm run dev-stack:stop
 
 ```bash
 $ npm install
+```
+
+### Seeder
+
+```bash
+# for app structural data
+$ npm run seed:structural
+# for dummy data
+$ npm run seed:dummy
 ```
 
 ### Running the app
