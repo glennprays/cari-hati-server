@@ -11,6 +11,8 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 COPY ./prisma ./prisma
+COPY .env ./
+COPY .env.local ./
 EXPOSE 3000 
 
 CMD ["npm", "run", "prisma:push", "&&", "npm", "run", "seed:structural", "&&", "npm", "run", "start:prod"]
