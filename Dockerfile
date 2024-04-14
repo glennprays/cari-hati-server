@@ -8,12 +8,8 @@ RUN npm run build
 
 FROM node:16-alpine as production
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/.env ./
-COPY --from=builder /app/.env.local ./
-COPY --from=builder /app/src/ ./src/
+COPY --from=builder /app/ .
+RUN rm -rf ./node_modules
 RUN npm install -g ts-node
 EXPOSE 3000 
 
