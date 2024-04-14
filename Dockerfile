@@ -11,6 +11,7 @@ WORKDIR /app
 COPY --from=builder /app/ .
 RUN rm -rf ./node_modules
 RUN npm install -g ts-node
+RUN npm i prisma@5.12.1 -D
 EXPOSE 3000 
 
 CMD sh -c "npm run prisma:push && npm run seed:structural && npm run start:prod"
