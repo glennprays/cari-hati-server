@@ -1,7 +1,6 @@
 import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { RedisService } from './redis.service';
-import * as fs from 'fs';
 
 @Module({
     providers: [
@@ -12,10 +11,7 @@ import * as fs from 'fs';
                     host: process.env.RD_HOST || 'localhost',
                     port: parseInt(process.env.RD_PORT) || 6379,
                     password: process.env.RD_PASSWORD || '',
-                    tls:
-                        process.env.RD_TLS === 'true'
-                            ? {}
-                            : undefined,
+                    tls: process.env.RD_TLS === 'true' ? {} : undefined,
                 });
             },
         },
@@ -32,6 +28,5 @@ export class RedisModule implements OnModuleInit {
             'Connection to Redis...',
         );
         this.logger.log(status);
-        // this.logger.log('No Connection to Redis...');
     }
 }
