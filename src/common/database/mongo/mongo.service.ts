@@ -1,11 +1,17 @@
-import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+    INestApplication,
+    Injectable,
+    Logger,
+    OnModuleInit,
+} from '@nestjs/common';
 import { PrismaClient } from '../../../../prisma/mongo/generated/client';
 
 @Injectable()
 export class MongoService extends PrismaClient implements OnModuleInit {
+    private logger = new Logger('MongoModule');
     async onModuleInit() {
         await this.$connect();
-        console.log('Connection to Mongo...');
+        this.logger.log('Connection to Mongo...');
     }
 
     async enableShutdownHooks(app: INestApplication) {
