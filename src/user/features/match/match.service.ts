@@ -99,7 +99,11 @@ export class MatchService {
                         id: true,
                         name: true,
                         birth: true,
-                        photoProfile: true,
+                        photoProfile: {
+                            select: {
+                                path: true,
+                            },
+                        },
                     },
                 },
                 receiver: {
@@ -107,7 +111,11 @@ export class MatchService {
                         id: true,
                         name: true,
                         birth: true,
-                        photoProfile: true,
+                        photoProfile: {
+                            select: {
+                                path: true,
+                            },
+                        },
                     },
                 },
             },
@@ -116,11 +124,15 @@ export class MatchService {
             ...match,
             sender: {
                 ...match.sender,
-                photoProfile: `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile}`,
+                photoProfile: {
+                    path: `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile.path}`,
+                },
             },
             receiver: {
                 ...match.receiver,
-                photoProfile: `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile}`,
+                photoProfile: {
+                    path: `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile.path}`,
+                },
             },
         }));
     }
