@@ -14,14 +14,7 @@ import * as fs from 'fs';
                     password: process.env.RD_PASSWORD || '',
                     tls:
                         process.env.RD_TLS === 'true'
-                            ? {
-                                  ca: [
-                                      fs.readFileSync(
-                                          './redis-cert.pem',
-                                      ),
-                                  ],
-                                  rejectUnauthorized: true,
-                              }
+                            ? {}
                             : undefined,
                 });
             },
