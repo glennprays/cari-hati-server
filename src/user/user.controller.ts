@@ -29,6 +29,12 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     @UseGuards(JwtGuard)
+    @Get('profile/:userId')
+    async getOtherUserProfile(@Param('userId') userId: string) {
+        return this.userService.findOneById(userId);
+    }
+
+    @UseGuards(JwtGuard)
     @Get('profile')
     async getProfile(@Request() req) {
         return this.userService.findOneById(req.user.sub.id);
@@ -182,5 +188,36 @@ export class UserController {
             data.target_id,
         );
         return user;
+    }
+
+    @UseGuards(JwtGuard)
+    @Get(':userId/gallery')
+    async getUserGallery(@Param('userId') userId: string) {
+        return this.userService.getUserGallery(userId);
+    }
+
+    @UseGuards(JwtGuard)
+    @Patch('gallery/photos')
+    @UseInterceptors(FileInterceptor('image'))
+    async addPhotoToUserGallery(
+        @UploadedFile() image: Express.Multer.File,
+        @Request() req,
+    ) {
+        return await this.userService.addPhotoToUserGallery(
+            req.user.sub.id,
+            image,
+        );
+    }
+
+    @UseGuards(JwtGuard)
+    @Delete('gallery/photos/:photoId')
+    async deletePhotoFromUserGallery(
+        @Param('photoId') photoId: string,
+        @Request() req,
+    ) {
+        return await this.userService.deletePhotoFromUserGallery(
+            req.user.sub.id,
+            photoId,
+        );
     }
 }

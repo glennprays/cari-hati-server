@@ -88,9 +88,41 @@ export class MatchService {
 
         const userMatches = await this.mongoService.userMatch.findMany({
             where: whereClause,
+            select: {
+                id: true,
+                createdAt: true,
+                liked: true,
+                status: true,
+                updatedAt: true,
+                sender: {
+                    select: {
+                        id: true,
+                        name: true,
+                        birth: true,
+                        photoProfile: true,
+                    },
+                },
+                receiver: {
+                    select: {
+                        id: true,
+                        name: true,
+                        birth: true,
+                        photoProfile: true,
+                    },
+                },
+            },
         });
-
-        return userMatches;
+        return userMatches.map((match) => ({
+            ...match,
+            sender: {
+                ...match.sender,
+                photoProfile: `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile}`,
+            },
+            receiver: {
+                ...match.receiver,
+                photoProfile: `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile}`,
+            },
+        }));
     }
 
     async unmatchWithUser(currentUser: string, targetUser: string) {
