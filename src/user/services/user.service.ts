@@ -18,6 +18,7 @@ import { NotificationService } from 'src/notification/services/notification.serv
 import { MatchService } from '../features/match/match.service';
 import { PassionDTO } from 'src/data/dtos/passion.dto';
 import { PostgresService } from 'src/common/database/postgres/postgres.service';
+import { PhotoGalleryService } from '../features/photo-gallery/photo-gallery.service';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
         private notificationService: NotificationService,
         private matchService: MatchService,
         private postgresService: PostgresService,
+        private photoGalleryService: PhotoGalleryService,
     ) {}
 
     async findOneById(id: string) {
@@ -243,6 +245,7 @@ export class UserService {
                 },
             });
             await this.s3Service.uploadAObject(filename, image);
+            user.photoProfile.path = `${process.env.S3_BUCKET_URL}/${user.photoProfile.path}`;
             return user;
         } catch (error) {
             throw new BadRequestException(error);
@@ -553,5 +556,25 @@ export class UserService {
             console.log(error);
             throw new BadRequestException(error.message);
         }
+    }
+
+    async getUserGallery(userId: string) {
+        try {
+            const photos = await this.photoGalleryService.getUserPhotos(userId);
+            return photos;
+        } catch (error) {
+            throw new BadRequestException(error);
+        }
+    }
+
+    async addPhotoToUserGallery(userId: string, image: Express.Multer.File) {
+        return await this.photoGalleryService.addPhotoToGallery(userId, image);
+    }
+
+    async deletePhotoFromUserGallery(userId: string, photoId: string) {
+        return await this.photoGalleryService.deletePhotoFromGallery(
+            userId,
+            photoId,
+        );
     }
 }
