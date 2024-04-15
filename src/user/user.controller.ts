@@ -29,6 +29,12 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     @UseGuards(JwtGuard)
+    @Get('profile/:userId')
+    async getOtherUserProfile(@Param('userId') userId: string) {
+        return this.userService.findOneById(userId);
+    }
+
+    @UseGuards(JwtGuard)
     @Get('profile')
     async getProfile(@Request() req) {
         return this.userService.findOneById(req.user.sub.id);
