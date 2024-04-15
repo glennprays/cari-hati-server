@@ -183,4 +183,35 @@ export class UserController {
         );
         return user;
     }
+
+    @UseGuards(JwtGuard)
+    @Get(':userId/gallery')
+    async getUserGallery(@Param('userId') userId: string) {
+        return this.userService.getUserGallery(userId);
+    }
+
+    @UseGuards(JwtGuard)
+    @Patch('gallery/photos')
+    @UseInterceptors(FileInterceptor('image'))
+    async addPhotoToUserGallery(
+        @UploadedFile() image: Express.Multer.File,
+        @Request() req,
+    ) {
+        return await this.userService.addPhotoToUserGallery(
+            req.user.sub.id,
+            image,
+        );
+    }
+
+    @UseGuards(JwtGuard)
+    @Delete('gallery/photos/:photoId')
+    async deletePhotoFromUserGallery(
+        @Param('photoId') photoId: string,
+        @Request() req,
+    ) {
+        return await this.userService.deletePhotoFromUserGallery(
+            req.user.sub.id,
+            photoId,
+        );
+    }
 }
