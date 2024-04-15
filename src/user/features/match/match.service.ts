@@ -124,11 +124,15 @@ export class MatchService {
             ...match,
             sender: {
                 ...match.sender,
-                photoProfile: `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile}`,
+                photoProfile: {
+                    path: `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile.path}`,
+                },
             },
             receiver: {
                 ...match.receiver,
-                photoProfile: `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile}`,
+                photoProfile: {
+                    path: `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile.path}`,
+                },
             },
         }));
     }
