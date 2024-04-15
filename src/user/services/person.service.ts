@@ -34,13 +34,6 @@ export class PersonService {
                     passions: {
                         set: [],
                     },
-                    LoginSession: {
-                        create: {
-                            data: {
-                                set: [],
-                            },
-                        },
-                    },
                     userGallery: {
                         create: {
                             createdAt: new Date(),
