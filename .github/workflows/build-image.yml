@@ -24,7 +24,7 @@ jobs:
               run: echo "${{ secrets.ENV_LOCAL_FILE }}" > .env.local
 
             - name: Create redis tls certificate
-              run: echo "${{ secrets.REDIS_TLS_CERT }}" > redis-cert.crt
+              run: echo "${{ secrets.REDIS_TLS_CERT }}" > redis-cert.pem
 
             - name: Login to Dockerhub
               run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
