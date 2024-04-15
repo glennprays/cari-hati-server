@@ -7,12 +7,14 @@ import {
 import {
     Inject,
     Injectable,
+    Logger,
     NotAcceptableException,
     OnModuleInit,
 } from '@nestjs/common';
 
 @Injectable()
 export class S3Service implements OnModuleInit {
+    private logger = new Logger('S3Module');
     private bucketName = process.env.S3_BUCKET;
     constructor(@Inject('S3_CLIENT') private s3Client: S3Client) {}
 
@@ -25,7 +27,7 @@ export class S3Service implements OnModuleInit {
         if (!bucketStatus) {
             throw new Error('Bucket is not exist');
         }
-        console.log('Connection to S3...');
+        this.logger.log('Connection to S3...');
     }
 
     async uploadAObject(key: string, body: Express.Multer.File) {

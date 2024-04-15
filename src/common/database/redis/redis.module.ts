@@ -1,4 +1,4 @@
-import { Inject, Module, OnModuleInit } from '@nestjs/common';
+import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { RedisService } from './redis.service';
 
@@ -19,12 +19,13 @@ import { RedisService } from './redis.service';
     exports: ['REDIS_CLIENT', RedisService],
 })
 export class RedisModule implements OnModuleInit {
+    private logger = new Logger('RedisModule');
     constructor(@Inject('REDIS_CLIENT') private redisClient: Redis) {}
 
     async onModuleInit() {
         const status = await await this.redisClient.echo(
             'Connection to Redis...',
         );
-        console.log(status);
+        this.logger.log(status);
     }
 }
