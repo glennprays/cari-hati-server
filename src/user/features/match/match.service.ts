@@ -120,21 +120,16 @@ export class MatchService {
                 },
             },
         });
-        return userMatches.map((match) => ({
-            ...match,
-            sender: {
-                ...match.sender,
-                photoProfile: {
-                    path: `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile.path}`,
-                },
-            },
-            receiver: {
-                ...match.receiver,
-                photoProfile: {
-                    path: `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile.path}`,
-                },
-            },
-        }));
+
+        return userMatches.map((match) => {
+            if (match.sender.photoProfile) {
+                match.sender.photoProfile.path = `${process.env.S3_BUCKET_URL}/${match.sender.photoProfile.path}`;
+            }
+            if (match.receiver.photoProfile) {
+                match.receiver.photoProfile.path = `${process.env.S3_BUCKET_URL}/${match.receiver.photoProfile.path}`;
+            }
+            return match;
+        });
     }
 
     async unmatchWithUser(currentUser: string, targetUser: string) {
