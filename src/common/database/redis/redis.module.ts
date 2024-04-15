@@ -1,6 +1,7 @@
 import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { RedisService } from './redis.service';
+import * as fs from 'fs';
 
 @Module({
     providers: [
@@ -11,9 +12,17 @@ import { RedisService } from './redis.service';
                     host: process.env.RD_HOST || 'localhost',
                     port: parseInt(process.env.RD_PORT) || 6379,
                     password: process.env.RD_PASSWORD || '',
-                    tls: {
-                        checkServerIdentity: () => undefined,
-                    },
+                    tls:
+                        process.env.RD_TLS === 'true'
+                            ? {
+                                  ca: [
+                                      fs.readFileSync(
+                                          './redis-cert.pem',
+                                      ),
+                                  ],
+                                  rejectUnauthorized: true,
+                              }
+                            : undefined,
                 });
             },
         },
