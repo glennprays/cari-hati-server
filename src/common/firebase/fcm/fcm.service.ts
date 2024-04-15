@@ -3,6 +3,7 @@ import {
     Inject,
     OnModuleInit,
     BadGatewayException,
+    Logger,
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import {
@@ -12,6 +13,7 @@ import {
 
 @Injectable()
 export class FcmService implements OnModuleInit {
+    private logger = new Logger('FCMModule');
     constructor(
         @Inject('FIREBASE_ADMIN') private readonly firebaseAdmin: admin.app.App,
     ) {}
@@ -21,7 +23,7 @@ export class FcmService implements OnModuleInit {
                 .firestore()
                 .listCollections()
                 .then(() => {
-                    console.log('Connection to firebase admin...');
+                    this.logger.log('Connection to firebase admin...');
                 });
         } catch (error) {
             console.error('Firebase connection error:', error);
