@@ -11,6 +11,9 @@ import { RedisService } from './redis.service';
                     host: process.env.RD_HOST || 'localhost',
                     port: parseInt(process.env.RD_PORT) || 6379,
                     password: process.env.RD_PASSWORD || '',
+                    tls: {
+                        checkServerIdentity: () => undefined,
+                    },
                 });
             },
         },
@@ -23,10 +26,10 @@ export class RedisModule implements OnModuleInit {
     constructor(@Inject('REDIS_CLIENT') private redisClient: Redis) {}
 
     async onModuleInit() {
-        // const status = await await this.redisClient.echo(
-        //     'Connection to Redis...',
-        // );
-        // this.logger.log(status);
-        this.logger.log('No Connection to Redis...');
+        const status = await await this.redisClient.echo(
+            'Connection to Redis...',
+        );
+        this.logger.log(status);
+        // this.logger.log('No Connection to Redis...');
     }
 }
