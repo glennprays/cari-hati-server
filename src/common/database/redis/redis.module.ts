@@ -23,9 +23,10 @@ export class RedisModule implements OnModuleInit {
     constructor(@Inject('REDIS_CLIENT') private redisClient: Redis) {}
 
     async onModuleInit() {
-        const status = await await this.redisClient.echo(
-            'Connection to Redis...',
-        );
-        this.logger.log(status);
+        // const status = await await this.redisClient.echo(
+        //     'Connection to Redis...',
+        // );
+        // this.logger.log(status);
+        this.logger.log('No Connection to Redis...');
     }
 }
