@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
-    UserGetAllMatchDTO,
     UserRequestMatchDTO,
     UserUnmatchMatchDTO,
     UserUpdateStatusMatchDTO,
@@ -38,12 +37,12 @@ export class MatchController {
     @UseGuards(JwtGuard)
     @Get('')
     async getUserMatch(
-        @Body() userGetAllMatchDTO: UserGetAllMatchDTO,
+        @Query('accepted_only') acceptedOnly: string,
         @Request() req,
     ) {
         return this.matchService.findAllMatchesByUserId(
             req.user.sub.id,
-            userGetAllMatchDTO.accepted_only,
+            acceptedOnly === 'true' ? true : false,
         );
     }
 
