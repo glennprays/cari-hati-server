@@ -1,5 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { MatchStatus, Passion } from 'prisma/mongo/generated/client';
+import {
+    MatchStatus,
+    Passion,
+} from '../../../../prisma/mongo/generated/client';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { UserMatch } from './models/match.model';
 
@@ -13,7 +16,7 @@ export class MatchService {
         liked?: boolean,
     ) {
         if (senderId === receiverId) {
-            throw new BadRequestException('');
+            throw new BadRequestException('Cannot match with yourself');
         }
 
         const sender = await this.mongoService.user.findUnique({
@@ -47,10 +50,13 @@ export class MatchService {
         const matchId = `${senderId}-${receiverId}`;
         const userMatch = await this.mongoService.userMatch.findFirst({
             where: {
-                id: matchId,
                 status: {
                     not: MatchStatus.ignored,
                 },
+                OR: [
+                    { senderId: senderId, receiverId: receiverId },
+                    { senderId: receiverId, receiverId: senderId },
+                ],
             },
         });
 
@@ -77,12 +83,11 @@ export class MatchService {
         });
     }
 
-    async findAllMatchesByUserId(userId: string, accepted_only?: boolean) {
+    async findAllMatchesByUserId(userId: string, acceptedOnly?: boolean) {
         const whereClause: any = {
             OR: [{ senderId: userId }, { receiverId: userId }],
         };
-
-        if (accepted_only) {
+        if (acceptedOnly) {
             whereClause.status = MatchStatus.accepted;
         }
 
@@ -166,11 +171,9 @@ export class MatchService {
         state: MatchStatus,
     ): Promise<UserMatch | null> {
         try {
-            const updateData: Partial<UserMatch> = { status: state };
-
             const updateUserMatch = await this.mongoService.userMatch.update({
-                where: { id: idMatch, senderId: userId, status: 'pending' },
-                data: updateData,
+                where: { id: idMatch, receiverId: userId, status: 'pending' },
+                data: { status: state },
             });
 
             return updateUserMatch;

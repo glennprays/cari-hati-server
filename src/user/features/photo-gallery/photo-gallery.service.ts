@@ -22,7 +22,7 @@ export class PhotoGalleryService {
             });
             return userGallery;
         } catch (error) {
-            throw new BadRequestException('Error getting user gallery');
+            throw new BadRequestException(error.message);
         }
     }
 
