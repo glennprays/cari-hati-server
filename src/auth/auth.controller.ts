@@ -27,7 +27,7 @@ export class AuthController {
     ) {}
 
     @UseGuards(LocalAuthGuard)
-    @Get('signin')
+    @Post('signin')
     async signIn(
         @Body() data: { fcm_token: string },
         @Request() req,
