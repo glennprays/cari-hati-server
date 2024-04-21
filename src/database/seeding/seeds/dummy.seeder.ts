@@ -8,6 +8,9 @@ import {
 } from '../../../../prisma/mongo/generated/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { hash } from 'argon2';
+import { UsersFactory } from '../../factories/users.factory';
+import { PersonFactory } from '../../factories/person.factory';
+
 
 export async function dummySeeder(
     mongo: MongoClient<PrismaMongo.PrismaClientOptions, never, DefaultArgs>,
@@ -106,4 +109,95 @@ export async function dummySeeder(
             liked: false,
         },
     });
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs = require('fs');
+    const csvFilePath = 'src/database/seeding/seeds/raw/dummy-users.csv';
+    const usersDummy = [];
+    const personDummy = [];
+    let persons = [];
+
+    fs.readFile(csvFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading CSV file:', err);
+            return;
+        }
+
+        const rows = data.split('\n').map(row => row.split(','));
+
+        rows.forEach(async (row) => {
+            try {
+                const [emails, role,names,gender, birth, description, matchClass, userPassion] = row
+
+                const users = await UsersFactory.createMany(
+                    names.split(','),
+                    gender,
+                    new Date(birth),
+                    description,
+                    matchClass,
+                    userPassion,
+                );
+
+                const persons = await PersonFactory.createMany(
+                    emails,
+                    role,
+                    "examplePass*123",
+                );
+
+                usersDummy.push(...users);
+                personDummy.push(...persons);
+                console.log("person dummy",personDummy)
+
+                console.log('Successfully processed row from CSV.');
+            } catch (error) {
+                console.error('Error processing CSV row:', error);
+            }
+        });
+    });
+
+    const hashPass = await hash('examplePass*123');
+    const createManyPersonData = await Promise.all(
+        personDummy.map(async (person) => {
+            const createdPerson = await postgres.person.upsert({
+                where: { email: person.email },
+                update: {},
+                create: {
+                    email: person.email,
+                    password: hashPass,
+                    role: person.role,
+                    activatedAt: new Date(),
+                },
+            });
+
+            persons.push(createdPerson);
+
+            return createdPerson;
+        }),
+    );
+    await Promise.all(createManyPersonData);
+
+    const createManyUsersData = usersDummy.map((user, index) =>
+        mongo.user.upsert({
+            where: { id: persons[index].id },
+            update: {},
+            create: {
+                id: persons[index].id,
+                name: user.name,
+                photoProfile: user.photoProfile,
+                gender: user.gender,
+                birth:  user.birth,
+                description: user.description,
+                matchClass: user.matchClass,
+                passions: user.passions,
+                userGallery: {
+                    create: {
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    },
+                },
+            },
+        }),
+    );
+
+    await Promise.all(createManyUsersData);
 }
