@@ -14,6 +14,7 @@ import { RedisService } from 'src/common/database/redis/redis.service';
 import { UserService } from 'src/user/services/user.service';
 import { generateHash } from 'src/utils/hash.util';
 import { RedisKeyFactory } from 'src/common/database/redis/factory/key.factory';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
         private jwtService: JwtService,
         private mailService: MailService,
         private redisService: RedisService,
+        private notificationService: NotificationService,
     ) {}
 
     async validatePerson(
@@ -118,6 +120,23 @@ export class AuthService {
             res.cookie('refresh_token', refresh_token, {
                 expires: tokenExpires,
             });
+
+            this.notificationService.sendNotificationToUser(
+                person.id,
+                'anoucement',
+                {
+                    notification: {
+                        title: 'Register Success',
+                        body: `Congratulations! You have successfully registered for an cari hati account. Please check your email for verification`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: "",
+                        },
+                    },
+                },
+                "",
+            );
             return { access_token, person };
         } catch (error) {
             throw new BadRequestException(error.message);
@@ -158,15 +177,42 @@ export class AuthService {
     }
 
     async activateAccount(email: string, code: number) {
-        const status = await this.redisService.verifyVerificationCode(
-            email,
-            code,
-        );
-        if (status) {
-            await this.personService.activatePerson(email);
-            return { message: 'Account activation success' };
+        try {
+            const status = await this.redisService.verifyVerificationCode(email, code);
+            
+            if (status) {
+                const user = await this.personService.findOneByEmail(email);
+                
+                if (!user) {
+                    throw new Error('User not found');
+                }
+    
+                await this.notificationService.sendNotificationToUser(
+                    user.id,
+                    'anoucement',
+                    {
+                        notification: {
+                            title: 'Account Activation Success',
+                            body: 'Congratulations! Your account has been successfully activated.'
+                        },
+                        webpush: {
+                            fcmOptions: {
+                                link: ""
+                            }
+                        }
+                    },
+                    "",
+                );
+                await this.personService.activatePerson(email);
+                return { message: 'Account activation success' };
+            } else {
+                throw new Error('Verification code is invalid');
+            }
+        } catch (error) {
+            throw new Error('Failed to activate account: ' + error.message);
         }
     }
+    
 
     async resendVerificationCode(email: string) {
         const person = await this.personService.findOneByEmail(email);
@@ -182,6 +228,22 @@ export class AuthService {
             verificationCode,
         );
         if (status) {
+            await this.notificationService.sendNotificationToUser(
+                person.id,
+                'anoucement',
+                {
+                    notification: {
+                        title: 'Resend Account Activation Success',
+                        body: 'A new activation code has been sent to your email. Please check your email'
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: ""
+                        }
+                    }
+                },
+                "",
+            );
             this.mailService.sendAccountVerification(email, verificationCode);
             return { message: 'New verification code sent' };
         }
@@ -225,13 +287,34 @@ export class AuthService {
             'EX',
             60 * 2,
         );
+
         if (status) {
+            await this.notificationService.sendNotificationToUser(
+                person.id,
+                'anoucement',
+                {
+                    notification: {
+                        title: 'Reset Password Request',
+                        body: 'Instructions for resetting your password have been sent to your email. Please check your email'
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: ""
+                        }
+                    }
+                },
+                "",
+            );
             this.mailService.sendResetPassword(email, resetUrl);
             return { message: 'Reset url sent' };
         }
     }
 
     async resetPassword(email: string, hash: string, password: string) {
+        const person = await this.personService.findOneByEmail(email);
+        if (!person) {
+            throw new BadRequestException('Account does not exist');
+        }
         const key = RedisKeyFactory.resetPasswordKey(email);
         const existingHash = await this.redisService.redisClient.get(key);
         if (!existingHash) {
@@ -240,6 +323,22 @@ export class AuthService {
         if (existingHash !== hash) {
             throw new BadRequestException('Invalid reset url');
         }
+        await this.notificationService.sendNotificationToUser(
+            person.id,
+            'anoucement',
+            {
+                notification: {
+                    title: 'Reset Password Success',
+                    body: 'Your password has been successfully reset. Please sign in with your new password'
+                },
+                webpush: {
+                    fcmOptions: {
+                        link: ""
+                    }
+                }
+            },
+            "",
+        );
         await this.personService.resetPassword(email, password);
         await this.redisService.redisClient.del(key);
         return { message: 'Password reset success' };

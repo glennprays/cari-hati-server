@@ -5,10 +5,14 @@ import {
 } from '../../../../prisma/mongo/generated/client';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
 import { UserMatch } from './models/match.model';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 @Injectable()
 export class MatchService {
-    constructor(private mongoService: MongoService) {}
+    constructor(
+        private mongoService: MongoService,
+        private notificationService: NotificationService,
+    ) {}
 
     async userRequestMatch(
         senderId: string,
@@ -159,6 +163,24 @@ export class MatchService {
                 throw new Error('Unmatch Failed');
             }
 
+            const targetPath = `/matches/${targetUser}`;
+            this.notificationService.sendNotificationToUser(
+                targetUser,
+                'match',
+                {
+                    notification: {
+                        title: 'Unmatch Success',
+                        body: `You have successfully unmatched. They will no longer be able to see you or message you`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
+
             return { message: 'Unmatched successfully' };
         } catch (error) {
             throw new BadRequestException(error.message);
@@ -175,6 +197,24 @@ export class MatchService {
                 where: { id: idMatch, receiverId: userId, status: 'pending' },
                 data: { status: state },
             });
+
+            const targetPath = `/matches/${userId}`;
+            this.notificationService.sendNotificationToUser(
+                userId,
+                'match',
+                {
+                    notification: {
+                        title: 'Update Match Success',
+                        body: `The status of your match has been updated`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
 
             return updateUserMatch;
         } catch (error) {

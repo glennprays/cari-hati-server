@@ -545,6 +545,24 @@ export class UserService {
                 },
             });
 
+            const targetPath = `/users/${userId}`;
+            this.notificationService.sendNotificationToUser(
+                userId,
+                'anoucement',
+                {
+                    notification: {
+                        title: 'Block User',
+                        body: `User has been successfully blocked.`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
+
             return await this.mongoService.blocked.create({
                 data: {
                     blockerId: userId,
