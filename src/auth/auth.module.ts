@@ -9,6 +9,7 @@ import { MailModule } from 'src/common/mail/mail.module';
 import { RedisModule } from 'src/common/database/redis/redis.module';
 import { WebsocketExceptionsFilter } from './filters/ws.exception';
 import { AuthController } from './auth.controller';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
     providers: [
@@ -27,6 +28,7 @@ import { AuthController } from './auth.controller';
             secret: process.env.JWT_ACCESS_TOKEN_SECRET,
             signOptions: { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION },
         }),
+        NotificationModule,
     ],
     controllers: [AuthController],
 })
