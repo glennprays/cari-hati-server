@@ -187,7 +187,7 @@ export class AuthService {
                     throw new Error('User not found');
                 }
     
-                await this.notificationService.sendNotificationToUser(
+                this.notificationService.sendNotificationToUser(
                     user.id,
                     'anoucement',
                     {
@@ -228,7 +228,7 @@ export class AuthService {
             verificationCode,
         );
         if (status) {
-            await this.notificationService.sendNotificationToUser(
+            this.notificationService.sendNotificationToUser(
                 person.id,
                 'anoucement',
                 {
@@ -289,7 +289,7 @@ export class AuthService {
         );
 
         if (status) {
-            await this.notificationService.sendNotificationToUser(
+            this.notificationService.sendNotificationToUser(
                 person.id,
                 'anoucement',
                 {
@@ -323,7 +323,7 @@ export class AuthService {
         if (existingHash !== hash) {
             throw new BadRequestException('Invalid reset url');
         }
-        await this.notificationService.sendNotificationToUser(
+        this.notificationService.sendNotificationToUser(
             person.id,
             'anoucement',
             {

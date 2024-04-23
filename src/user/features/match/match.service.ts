@@ -143,6 +143,25 @@ export class MatchService {
 
     async unmatchWithUser(currentUser: string, targetUser: string) {
         try {
+            const matchesToDelete = await this.mongoService.userMatch.findMany({
+                where: {
+                    OR: [
+                        {
+                            senderId: currentUser,
+                            receiverId: targetUser,
+                        },
+                        {
+                            senderId: targetUser,
+                            receiverId: currentUser,
+                        },
+                    ],
+                    status: MatchStatus.accepted,
+                },
+            });
+    
+            const deletedMatchIds = matchesToDelete.map(match => match.id).join(',');
+            console.log(deletedMatchIds)
+    
             const unmatch = await this.mongoService.userMatch.deleteMany({
                 where: {
                     OR: [
@@ -158,12 +177,12 @@ export class MatchService {
                     status: MatchStatus.accepted,
                 },
             });
-
+    
             if (unmatch.count === 0) {
                 throw new Error('Unmatch Failed');
             }
-
-            const targetPath = `/matches/${targetUser}`;
+    
+            const targetPath = `/matches/${deletedMatchIds}`;
             this.notificationService.sendNotificationToUser(
                 targetUser,
                 'match',
@@ -180,13 +199,13 @@ export class MatchService {
                 },
                 targetPath,
             );
-
-            return { message: 'Unmatched successfully' };
+    
+            return { message: 'Unmatched successfully'};
         } catch (error) {
             throw new BadRequestException(error.message);
         }
     }
-
+    
     async updateMatchStatus(
         userId: string,
         idMatch: string,
@@ -205,7 +224,7 @@ export class MatchService {
                 {
                     notification: {
                         title: 'Update Match Success',
-                        body: `The status of your match has been updated`,
+                        body: `The status of your match has been updated to ${state}`,
                     },
                     webpush: {
                         fcmOptions: {
