@@ -36,7 +36,6 @@ export class NotificationService {
             }
 
             const fcmTokens = loginSession.data.map((val) => val.fcmToken);
-            console.log("tes",fcmTokens)
             if (!fcmTokens) {
                 throw new BadRequestException('FCM token not found');
             }
