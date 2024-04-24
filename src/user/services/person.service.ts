@@ -6,12 +6,14 @@ import { hash } from 'argon2';
 import { PersonDTO } from '../dtos/person.dto';
 import { PersonTokenPayload } from 'src/auth/models/payload.model';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
+import { NotificationService } from 'src/notification/services/notification.service';
 
 @Injectable()
 export class PersonService {
     constructor(
         private postgres: PostgresService,
         private mongoService: MongoService,
+        private notificationService: NotificationService,
     ) {}
 
     async findOneByEmail(email: string): Promise<Person | null> {
