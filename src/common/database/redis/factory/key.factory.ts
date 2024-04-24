@@ -22,4 +22,7 @@ export class RedisKeyFactory {
     static resetPasswordKey(email: string) {
         return `reset_password_${email}`;
     }
+    static userMatchNotRecommendation(userId: string, type: string) {
+        return `${type}_user_match_not_recommendation_${userId}`;
+    }
 }

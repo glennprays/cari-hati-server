@@ -103,10 +103,28 @@ export class CoinService {
                         name: 'withdraw',
                     },
                 });
+
             const convertCoinToMoney = coinAmount * 300;
             const transactionFee =
                 (convertCoinToMoney * withdrawType.feePercentage) / 100;
             await this.userService.updateUserCoins(userId, -coinAmount);
+            const targetPath = `/transactions/${userId}`;
+            this.notificationService.sendNotificationToUser(
+                userId,
+                'transaction',
+                {
+                    notification: {
+                        title: 'Withdraw Success',
+                        body: `Your recent coin withdrawal of ${coinAmount} coin has been successfully processed`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
             return await this.postgresService.coinTransaction.create({
                 data: {
                     id: `wd-${Date.now()}-${randomUUID()}`,
