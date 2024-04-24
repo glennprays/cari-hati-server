@@ -148,7 +148,7 @@ export class RoomService {
             const userKey = RedisKeyFactory.wsUserKey(clientId);
             const userId = await this.client.get(userKey);
             if (!userId) {
-                throw new Error('User not found');
+                return [];
             }
             const roomKeys = await this.client.keys('Room:*');
             const userRooms = await Promise.all(
