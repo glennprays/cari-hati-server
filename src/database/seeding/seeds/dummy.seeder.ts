@@ -123,11 +123,20 @@ export async function dummySeeder(
             return;
         }
 
+        data = data.replace(/\[([^\]]+)\]/g, (_, match) => {
+            return '[' + match.replace(/,/g, ';') + ']';
+        });
+
         const rows = data.split('\n').map(row => row.split(','));
 
         rows.forEach(async (row) => {
             try {
                 const [emails, role,names,gender, birth, description, matchClass, userPassion] = row
+
+                const passionsArray = userPassion.split(';').map(passion => ({
+                    name: passion.replace(/\[|\]/g, '').trim()
+                }));
+                console.log(passionsArray);
 
                 const users = await UsersFactory.createMany(
                     names.split(','),
@@ -135,7 +144,7 @@ export async function dummySeeder(
                     new Date(birth),
                     description,
                     matchClass,
-                    userPassion,
+                    passionsArray,
                 );
 
                 const persons = await PersonFactory.createMany(
@@ -146,7 +155,6 @@ export async function dummySeeder(
 
                 usersDummy.push(...users);
                 personDummy.push(...persons);
-                console.log("person dummy",personDummy)
 
                 console.log('Successfully processed row from CSV.');
             } catch (error) {
