@@ -496,11 +496,9 @@ export class MatchService {
                         id: true,
                         name: true,
                         birth: true,
-                        photoProfile: {
-                            select: {
-                                path: true,
-                            },
-                        },
+                        photoProfile: true,
+                        description: true,
+                        passions: true,
                     },
                 },
                 receiver: {
@@ -508,11 +506,9 @@ export class MatchService {
                         id: true,
                         name: true,
                         birth: true,
-                        photoProfile: {
-                            select: {
-                                path: true,
-                            },
-                        },
+                        photoProfile: true,
+                        description: true,
+                        passions: true,
                     },
                 },
             },
