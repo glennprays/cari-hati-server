@@ -4,6 +4,7 @@ import { Redis } from 'ioredis';
 import { ErrorReply } from 'redis';
 import { RedisKeyFactory } from 'src/common/database/redis/factory/key.factory';
 import { MatchService } from 'src/user/features/match/match.service';
+import { MongoService } from 'src/common/database/mongo/mongo.service';
 
 @Injectable()
 export class RoomService {
@@ -13,6 +14,7 @@ export class RoomService {
     constructor(
         private readonly redisService: RedisService,
         private readonly matchService: MatchService,
+        private readonly mongoService: MongoService,
     ) {
         this.client = this.redisService.redisClient;
     }
@@ -138,6 +140,67 @@ export class RoomService {
                 `Error checking if user ${clientId} in room ${roomId}: ${error.message}`,
             );
             throw new Error('Failed to check user in room');
+        }
+    }
+
+    async getUserRooms(clientId: string) {
+        try {
+            const userKey = RedisKeyFactory.wsUserKey(clientId);
+            const userId = await this.client.get(userKey);
+            if (!userId) {
+                throw new Error('User not found');
+            }
+            const roomKeys = await this.client.keys('Room:*');
+            const userRooms = await Promise.all(
+                roomKeys.map(async (roomKey) => {
+                    const isUserInRoom = await this.client.sismember(
+                        roomKey,
+                        clientId,
+                    );
+                    return isUserInRoom ? roomKey : null;
+                }),
+            );
+            const roomIds = userRooms.map((room) =>
+                RedisKeyFactory.decodeChatRoomKey(room),
+            );
+            const rooms = await this.mongoService.userMatch.findMany({
+                where: {
+                    id: {
+                        in: roomIds,
+                    },
+                },
+                select: {
+                    id: true,
+                    receiver: {
+                        select: {
+                            id: true,
+                            name: true,
+                            photoProfile: {
+                                select: {
+                                    path: true,
+                                },
+                            },
+                        },
+                    },
+                    sender: {
+                        select: {
+                            id: true,
+                            name: true,
+                            photoProfile: {
+                                select: {
+                                    path: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            return rooms;
+        } catch (error) {
+            this.logger.error(
+                `Error retrieving rooms for user ${clientId}: ${error.message}`,
+            );
+            throw new Error('Failed to retrieve rooms for user');
         }
     }
 }
