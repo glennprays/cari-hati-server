@@ -4,11 +4,18 @@ import {
     Passion,
 } from '../../../../prisma/mongo/generated/client';
 import { MongoService } from 'src/common/database/mongo/mongo.service';
+import { RedisService } from 'src/common/database/redis/redis.service';
 import { UserMatch } from './models/match.model';
+import { NotificationService } from 'src/notification/services/notification.service';
+import { RedisKeyFactory } from '../../../common/database/redis/factory/key.factory';
 
 @Injectable()
 export class MatchService {
-    constructor(private mongoService: MongoService) {}
+    constructor(
+        private mongoService: MongoService,
+        private redisService: RedisService,
+        private notificationService: NotificationService
+    ) {}
 
     async userRequestMatch(
         senderId: string,
@@ -48,10 +55,10 @@ export class MatchService {
         }
 
         const matchId = `${senderId}-${receiverId}`;
-        const userMatch = await this.mongoService.userMatch.findFirst({
+        const userMatchIgnoredOrRejected = await this.mongoService.userMatch.findFirst({
             where: {
                 status: {
-                    not: MatchStatus.ignored,
+                    in: [MatchStatus.ignored, MatchStatus.rejected],
                 },
                 OR: [
                     { senderId: senderId, receiverId: receiverId },
@@ -60,27 +67,40 @@ export class MatchService {
             },
         });
 
-        if (userMatch) {
-            throw new BadRequestException('User already has matched data');
-        }
+        if (userMatchIgnoredOrRejected) {
+            const match = await this.mongoService.userMatch.update({
+                where: { id: matchId, receiverId: receiverId, status: {in: [MatchStatus.ignored, MatchStatus.rejected]} },
+                data: { status: 'pending', updatedAt: new Date() },
+            });
+            this.getDataUserMatchNotRecommendation(senderId, receiverId);
 
-        return await this.mongoService.userMatch.create({
-            data: {
-                id: matchId,
-                sender: {
-                    connect: {
-                        id: senderId,
+            return match
+        } else {
+
+            if (userMatchIgnoredOrRejected.status == MatchStatus.accepted || userMatchIgnoredOrRejected.status == MatchStatus.pending) {
+                throw new BadRequestException('User already has matched data');
+            }
+
+            const match = await this.mongoService.userMatch.create({
+                data: {
+                    id: matchId,
+                    sender: {
+                        connect: {
+                            id: senderId,
+                        },
                     },
-                },
-                receiver: {
-                    connect: {
-                        id: receiverId,
+                    receiver: {
+                        connect: {
+                            id: receiverId,
+                        },
                     },
+                    liked: liked || false,
+                    status: MatchStatus.pending,
                 },
-                liked: liked || false,
-                status: MatchStatus.pending,
-            },
-        });
+            });
+            this.getDataUserMatchNotRecommendation(senderId, receiverId);
+            return match
+        }
     }
 
     async findAllMatchesByUserId(userId: string, acceptedOnly?: boolean) {
@@ -139,6 +159,22 @@ export class MatchService {
 
     async unmatchWithUser(currentUser: string, targetUser: string) {
         try {
+            const matchesToDelete = await this.mongoService.userMatch.findFirst({
+                where: {
+                    OR: [
+                        {
+                            senderId: currentUser,
+                            receiverId: targetUser,
+                        },
+                        {
+                            senderId: targetUser,
+                            receiverId: currentUser,
+                        },
+                    ],
+                    status: MatchStatus.accepted,
+                },
+            });
+    
             const unmatch = await this.mongoService.userMatch.deleteMany({
                 where: {
                     OR: [
@@ -155,16 +191,37 @@ export class MatchService {
                 },
             });
 
+            this.delUserMatchNotRecommendation(matchesToDelete.receiverId, "sender")
+            this.delUserMatchNotRecommendation(matchesToDelete.senderId, "receiver")
+    
             if (unmatch.count === 0) {
                 throw new Error('Unmatch Failed');
             }
-
-            return { message: 'Unmatched successfully' };
+    
+            const targetPath = `/matches/${matchesToDelete.id}`;
+            this.notificationService.sendNotificationToUser(
+                targetUser,
+                'match',
+                {
+                    notification: {
+                        title: 'Unmatch Success',
+                        body: `You have successfully unmatched. They will no longer be able to see you or message you`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
+    
+            return { message: 'Unmatched successfully'};
         } catch (error) {
             throw new BadRequestException(error.message);
         }
     }
-
+    
     async updateMatchStatus(
         userId: string,
         idMatch: string,
@@ -175,6 +232,31 @@ export class MatchService {
                 where: { id: idMatch, receiverId: userId, status: 'pending' },
                 data: { status: state },
             });
+
+            if (state == "accepted") {
+                this.getDataUserMatchNotRecommendation(updateUserMatch.senderId, userId);
+            } else if (state == "ignored" || state == "rejected") {
+                this.delUserMatchNotRecommendation(userId, "sender")
+                this.delUserMatchNotRecommendation(updateUserMatch.senderId, "receiver")
+            }
+
+            const targetPath = `/matches/${idMatch}`;
+            this.notificationService.sendNotificationToUser(
+                userId,
+                'match',
+                {
+                    notification: {
+                        title: 'Update Match Success',
+                        body: `The status of your match has been updated to ${state}`,
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: targetPath,
+                        },
+                    },
+                },
+                targetPath,
+            );
 
             return updateUserMatch;
         } catch (error) {
@@ -246,6 +328,9 @@ export class MatchService {
                 throw new BadRequestException('User not have passions');
             }
 
+            const senderIdsString = await this.getUserMatchNotRecommendation(userId, "sender");
+            const receiverIdsString = await this.getUserMatchNotRecommendation(userId, "receiver");
+
             const recommendations = await this.mongoService.user.findMany({
                 where: {
                     matchClass: {
@@ -253,6 +338,9 @@ export class MatchService {
                     },
                     gender: {
                         not: user.gender,
+                    },
+                    id: {
+                        notIn: receiverIdsString.concat(senderIdsString)
                     },
                 },
                 skip: offset || 0,
@@ -282,6 +370,67 @@ export class MatchService {
             return match;
         } catch (error) {
             throw new BadRequestException('Match not found');
+        }
+    }
+
+    async setUserMatchNotRecommendation(userId: string, type: string, value: string[]) {
+        const key = RedisKeyFactory.userMatchNotRecommendation(userId, type);
+        const keyExists = await this.redisService.redisClient.exists(key);
+        
+        if (keyExists) {
+            await this.redisService.redisClient.del(key);
+        }
+    
+        return await this.redisService.redisClient.sadd(key, value);
+    }    
+
+    async getUserMatchNotRecommendation(userId: string, type: string) {
+        const key = RedisKeyFactory.userMatchNotRecommendation(userId, type);
+        const userMatchNotRecommendation = await this.redisService.redisClient.smembers(key);
+        
+        if (!userMatchNotRecommendation || userMatchNotRecommendation.length === 0) {
+            return [];
+        }
+    
+        return userMatchNotRecommendation
+    }
+
+    async delUserMatchNotRecommendation(userId: string, type: string) {
+        const key = RedisKeyFactory.userMatchNotRecommendation(userId, type);
+        const keyExists = await this.redisService.redisClient.exists(key);
+
+        if (keyExists) {
+            await this.redisService.redisClient.del(key);
+        }
+    }
+
+    async getDataUserMatchNotRecommendation(senderId: string, receiverId: string) {
+        const matchSender = await this.mongoService.userMatch.findMany({
+            where: {
+                senderId: senderId,
+            },
+            select: {
+                receiverId: true,
+            }
+        })
+        const matchReceiver = await this.mongoService.userMatch.findMany({
+            where: {
+                receiverId: receiverId,
+            },
+            select: {
+                senderId: true,
+            }
+        })
+
+        const receiverIds = matchSender.map(match => match.receiverId);
+        const senderIds = matchReceiver.map(match => match.senderId);
+
+        if (receiverIds.length > 0) {
+            this.setUserMatchNotRecommendation(senderId, "receiver", receiverIds);
+        }
+        
+        if (senderIds.length > 0) {
+            this.setUserMatchNotRecommendation(receiverId, "sender", senderIds);
         }
     }
 }
