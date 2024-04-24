@@ -172,4 +172,10 @@ export class ChatGateway
             });
         }
     }
+
+    @SubscribeMessage('chatList')
+    async handleChatList(@ConnectedSocket() client: Socket) {
+        const rooms = await this.roomService.getUserRooms(client.id);
+        this.server.to(client.id).emit('chatList', rooms);
+    }
 }

@@ -7,6 +7,7 @@ import {
     Delete,
     Body,
     Query,
+    Param,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
@@ -44,6 +45,12 @@ export class MatchController {
             req.user.sub.id,
             acceptedOnly === 'true' ? true : false,
         );
+    }
+
+    @UseGuards(JwtGuard)
+    @Get(':id')
+    async getMatchById(@Request() req, @Param('id') id: string) {
+        return this.matchService.findMatch(req.user.sub.id, id);
     }
 
     @UseGuards(JwtGuard)
