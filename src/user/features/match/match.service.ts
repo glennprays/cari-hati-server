@@ -76,11 +76,13 @@ export class MatchService {
 
             return match
         } else {
-
-            if (userMatchIgnoredOrRejected.status == MatchStatus.accepted || userMatchIgnoredOrRejected.status == MatchStatus.pending) {
-                throw new BadRequestException('User already has matched data');
+            console.log("userMatch", userMatchIgnoredOrRejected);
+            if (userMatchIgnoredOrRejected != null) {
+                if (userMatchIgnoredOrRejected.status == MatchStatus.accepted || userMatchIgnoredOrRejected.status == MatchStatus.pending) {
+                    throw new BadRequestException('User already has matched data');
+                }
             }
-
+            
             const match = await this.mongoService.userMatch.create({
                 data: {
                     id: matchId,
