@@ -48,6 +48,16 @@ export class MatchController {
     }
 
     @UseGuards(JwtGuard)
+    @Get('recommendations')
+    async getRecommendations(@Request() req, @Query() query: any) {
+        return await this.matchService.getUserMatchRecommendation(
+            req.user.sub.id,
+            +query.limit,
+            +query.offset,
+        );
+    }
+
+    @UseGuards(JwtGuard)
     @Get(':id')
     async getMatchById(@Request() req, @Param('id') id: string) {
         return this.matchService.findMatch(req.user.sub.id, id);
@@ -75,16 +85,6 @@ export class MatchController {
             req.user.sub.id,
             userUpdateStatusMatchDTO.id,
             userUpdateStatusMatchDTO.state,
-        );
-    }
-
-    @UseGuards(JwtGuard)
-    @Get('recommendations')
-    async getRecommendations(@Request() req, @Query() query: any) {
-        return await this.matchService.getUserMatchRecommendation(
-            req.user.sub.id,
-            +query.limit,
-            +query.offset,
         );
     }
 
