@@ -1,6 +1,6 @@
 # cari-hati-backend
 
-CariHati is a tinder clone project  
+CariHati is a project that inspired by Tinder dating App
 [Frontend repository](https://github.com/glennprays/cari-hati-ui)
 
 ## Getting Started
