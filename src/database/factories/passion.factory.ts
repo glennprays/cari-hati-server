@@ -1,7 +1,7 @@
 import { Passion } from '../../../src/user/models/passion.model';
 
 export class PassionFactory {
-    static async createMany(names: string[]) {
+    static createMany(names: string[]) {
         const passions: Passion[] = [];
         for (const name of names) {
             const passion = new Passion();

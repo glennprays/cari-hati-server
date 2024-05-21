@@ -12,7 +12,6 @@ import { RouterModule } from '@nestjs/core';
 import { FirebaseModule } from 'src/common/firebase/firebase.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { DataModule } from 'src/data/data.module';
-import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
     providers: [PersonService, UserService, PassionService],
