@@ -1,5 +1,6 @@
 FROM node:21-alpine as builder
 WORKDIR /app
+ENV HUSKY=0
 COPY package*.json ./
 RUN npm install 
 COPY . .
