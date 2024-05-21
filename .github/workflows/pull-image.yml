@@ -26,5 +26,8 @@ jobs:
             - name: Delete Old Docker container
               run: docker rm -f "${DOCKER_IMAGE}-container" || true
 
+            - name: Delete Old Docker image
+              run: docker rmi -f "${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest" || true
+
             - name: Run Docker Container
               run: docker run -d --name "${DOCKER_IMAGE}-container" --network ${DOCKER_NETWORK} "${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
