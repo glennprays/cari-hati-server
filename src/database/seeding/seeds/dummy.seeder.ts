@@ -1,8 +1,11 @@
 import {
+    PersonRole,
     PrismaClient as PostgresClient,
     Prisma as PrismaPostgres,
 } from '../../../../prisma/postgres/generated/client';
 import {
+    Gender,
+    MatchClass,
     PrismaClient as MongoClient,
     Prisma as PrismaMongo,
 } from '../../../../prisma/mongo/generated/client';
@@ -10,7 +13,7 @@ import { DefaultArgs } from '@prisma/client/runtime/library';
 import { hash } from 'argon2';
 import { UsersFactory } from '../../factories/users.factory';
 import { PersonFactory } from '../../factories/person.factory';
-
+import * as fs from 'fs';
 
 export async function dummySeeder(
     mongo: MongoClient<PrismaMongo.PrismaClientOptions, never, DefaultArgs>,
@@ -110,90 +113,76 @@ export async function dummySeeder(
         },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs');
     const csvFilePath = 'src/database/seeding/seeds/raw/dummy-users.csv';
-    const usersDummy = [];
-    const personDummy = [];
-    let persons = [];
+    const usersPersons = [];
+    const hashPass = await hash('examplePass*123');
 
-    fs.readFile(csvFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading CSV file:', err);
-            return;
-        }
-
+    try {
+        let data = await readCsv(csvFilePath);
         data = data.replace(/\[([^\]]+)\]/g, (_, match) => {
             return '[' + match.replace(/,/g, ';') + ']';
         });
 
-        const rows = data.split('\n').map(row => row.split(','));
+        const rows = data.split('\n').map((row) => row.split(','));
 
-        rows.forEach(async (row) => {
-            try {
-                const [emails, role,names,gender, birth, description, matchClass, userPassion] = row
+        rows.forEach((row) => {
+            const [
+                email,
+                role,
+                name,
+                gender,
+                birth,
+                description,
+                matchClass,
+                userPassions,
+            ] = row;
+            const passionsArray = userPassions.split(';').map((passion) => ({
+                name: passion.replace(/\[|\]/g, '').trim(),
+                createdAt: new Date(),
+                deletedAt: null,
+            }));
 
-                const passionsArray = userPassion.split(';').map(passion => ({
-                    name: passion.replace(/\[|\]/g, '').trim()
-                }));
-                console.log(passionsArray);
+            const person = PersonFactory.createPerson(
+                email,
+                role as PersonRole,
+                hashPass,
+            );
+            const user = UsersFactory.createUser(
+                name,
+                gender as Gender,
+                new Date(birth),
+                description,
+                matchClass as MatchClass,
+                passionsArray,
+            );
 
-                const users = await UsersFactory.createMany(
-                    names.split(','),
-                    gender,
-                    new Date(birth),
-                    description,
-                    matchClass,
-                    passionsArray,
-                );
-
-                const persons = await PersonFactory.createMany(
-                    emails,
-                    role,
-                    "examplePass*123",
-                );
-
-                usersDummy.push(...users);
-                personDummy.push(...persons);
-
-                console.log('Successfully processed row from CSV.');
-            } catch (error) {
-                console.error('Error processing CSV row:', error);
-            }
+            usersPersons.push({ user, person });
         });
-    });
+    } catch (err) {
+        console.error('Error reading CSV file:', err);
+    }
 
-    const hashPass = await hash('examplePass*123');
-    const createManyPersonData = await Promise.all(
-        personDummy.map(async (person) => {
-            const createdPerson = await postgres.person.upsert({
-                where: { email: person.email },
-                update: {},
-                create: {
-                    email: person.email,
-                    password: hashPass,
-                    role: person.role,
-                    activatedAt: new Date(),
-                },
-            });
-
-            persons.push(createdPerson);
-
-            return createdPerson;
-        }),
-    );
-    await Promise.all(createManyPersonData);
-
-    const createManyUsersData = usersDummy.map((user, index) =>
-        mongo.user.upsert({
-            where: { id: persons[index].id },
+    // insert data to database
+    const insertManyPerson = usersPersons.map(async ({ user, person }) => {
+        const createdPerson = await postgres.person.upsert({
+            where: { email: person.email },
             update: {},
             create: {
-                id: persons[index].id,
+                email: person.email,
+                password: person.password,
+                role: person.role,
+            },
+        });
+
+        await mongo.user.upsert({
+            where: { id: createdPerson.id },
+            update: {},
+            create: {
+                id: createdPerson.id,
                 name: user.name,
                 photoProfile: user.photoProfile,
                 gender: user.gender,
-                birth:  user.birth,
+                birth: user.birth,
                 description: user.description,
                 matchClass: user.matchClass,
                 passions: user.passions,
@@ -204,8 +193,14 @@ export async function dummySeeder(
                     },
                 },
             },
-        }),
-    );
+        });
+    });
 
-    await Promise.all(createManyUsersData);
+    await Promise.all(insertManyPerson);
+    console.log('Success Insert', insertManyPerson.length, 'Persons');
+}
+
+async function readCsv(csvFilePath: string) {
+    const data = await fs.promises.readFile(csvFilePath, 'utf8');
+    return data;
 }
