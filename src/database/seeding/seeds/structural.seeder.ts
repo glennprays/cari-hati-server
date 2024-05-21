@@ -22,7 +22,7 @@ export async function structuralSeeder(
         DefaultArgs
     >,
 ): Promise<void> {
-    const passions = await PassionFactory.createMany(rawData.passions);
+    const passions = PassionFactory.createMany(rawData.passions);
     const createManyPassions = passions.map((passion) =>
         mongo.passion.upsert({
             where: { name: passion.name },

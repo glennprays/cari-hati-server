@@ -131,11 +131,11 @@ export class AuthService {
                     },
                     webpush: {
                         fcmOptions: {
-                            link: "",
+                            link: '',
                         },
                     },
                 },
-                "",
+                '',
             );
             return { access_token, person };
         } catch (error) {
@@ -178,30 +178,33 @@ export class AuthService {
 
     async activateAccount(email: string, code: number) {
         try {
-            const status = await this.redisService.verifyVerificationCode(email, code);
-            
+            const status = await this.redisService.verifyVerificationCode(
+                email,
+                code,
+            );
+
             if (status) {
                 const user = await this.personService.findOneByEmail(email);
-                
+
                 if (!user) {
                     throw new Error('User not found');
                 }
-    
+
                 this.notificationService.sendNotificationToUser(
                     user.id,
                     'anoucement',
                     {
                         notification: {
                             title: 'Account Activation Success',
-                            body: 'Congratulations! Your account has been successfully activated.'
+                            body: 'Congratulations! Your account has been successfully activated.',
                         },
                         webpush: {
                             fcmOptions: {
-                                link: ""
-                            }
-                        }
+                                link: '',
+                            },
+                        },
                     },
-                    "",
+                    '',
                 );
                 await this.personService.activatePerson(email);
                 return { message: 'Account activation success' };
@@ -212,7 +215,6 @@ export class AuthService {
             throw new Error('Failed to activate account: ' + error.message);
         }
     }
-    
 
     async resendVerificationCode(email: string) {
         const person = await this.personService.findOneByEmail(email);
@@ -234,15 +236,15 @@ export class AuthService {
                 {
                     notification: {
                         title: 'Resend Account Activation Success',
-                        body: 'A new activation code has been sent to your email. Please check your email'
+                        body: 'A new activation code has been sent to your email. Please check your email',
                     },
                     webpush: {
                         fcmOptions: {
-                            link: ""
-                        }
-                    }
+                            link: '',
+                        },
+                    },
                 },
-                "",
+                '',
             );
             this.mailService.sendAccountVerification(email, verificationCode);
             return { message: 'New verification code sent' };
@@ -295,15 +297,15 @@ export class AuthService {
                 {
                     notification: {
                         title: 'Reset Password Request',
-                        body: 'Instructions for resetting your password have been sent to your email. Please check your email'
+                        body: 'Instructions for resetting your password have been sent to your email. Please check your email',
                     },
                     webpush: {
                         fcmOptions: {
-                            link: ""
-                        }
-                    }
+                            link: '',
+                        },
+                    },
                 },
-                "",
+                '',
             );
             this.mailService.sendResetPassword(email, resetUrl);
             return { message: 'Reset url sent' };
@@ -329,15 +331,15 @@ export class AuthService {
             {
                 notification: {
                     title: 'Reset Password Success',
-                    body: 'Your password has been successfully reset. Please sign in with your new password'
+                    body: 'Your password has been successfully reset. Please sign in with your new password',
                 },
                 webpush: {
                     fcmOptions: {
-                        link: ""
-                    }
-                }
+                        link: '',
+                    },
+                },
             },
-            "",
+            '',
         );
         await this.personService.resetPassword(email, password);
         await this.redisService.redisClient.del(key);
