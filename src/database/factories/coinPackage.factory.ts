@@ -1,7 +1,7 @@
 import { CoinPackage } from '../../coin/models/coins.model';
 
 export class CoinPackageFactory {
-    static async createMany(
+    static createMany(
         coinPackagesData: { coinAmount: bigint; price: number }[],
     ) {
         const coinPackages: CoinPackage[] = [];
